@@ -1,6 +1,4 @@
-<title> coco </title>
-
-本页仅供学习交流使用 如有侵权 请与速我联系 邮箱：cocojee@vip.qq.com
+本页内容仅供学习交流使用 如有侵权 请与速我联系 邮箱：cocojee@vip.qq.com
 
 内容持续更新中
 
