@@ -1,8 +1,8 @@
-## Welcome to GitHub Pages
+## 学习永无止境
 
-You can use the [editor on GitHub](https://github.com/cocojea/cocojea.github.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
+本页仅供学习交流使用(交流功能还没写出来) 如有侵权 请与我联系 邮箱：cocojee@vip.qq.com
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+This page is only for learning and communication (the communication function has not been written yet). If there is any infringement, please contact me at email: cocojee@vip.qq.com.
 
 ### Markdown
 
