@@ -44,7 +44,7 @@ buttons.forEach(button => {
             const num = parseFloat(display.value);
             if (buttonText === 'sin') {
                 display.value = Math.sin(num).toString();
-            } else if (buttonText === 'cos') {
+            } else if (buttonText ===  'cos') {
                 display.value = Math.cos(num).toString();
             } else if (buttonText === 'tan') {
                 display.value = Math.tan(num).toString();
