@@ -1,104 +1,103 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>项目人员评分系统</title>
     <style>
-        body {
-            font-family: '微软雅黑', sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #f0f3f9;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        input, select {
-            padding: 8px;
-            margin: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
-        }
-        button {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-        button:hover {
-            opacity: 0.8;
-        }
-        #history {
-            margin-top: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-        }
-        .record {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-        }
+        .container {max-width: 1000px; margin: 20px auto; font-family: Arial;}
+        .input-group {margin: 10px 0; padding: 15px; background: #f5f7fa; border-radius: 5px;}
+        table {width: 100%; border-collapse: collapse; margin-top: 10px;}
+        td, th {padding: 8px; border: 1px solid #ddd;}
+        .add-btn {background: #2196F3; color: white; padding: 5px 10px; border: none; cursor: pointer;}
+        .calc-btn {background: #4CAF50; margin-top: 10px;}
+        .total {color: #2196F3; font-weight: bold;}
     </style>
 </head>
 <body>
+<div class="container">
+    <!-- 人员基本信息 -->
     <div class="input-group">
-        <h2>评分计算器</h2>
-        <input type="text" id="name" placeholder="输入姓名">
-        <input type="number" id="projectNum" placeholder="负责项目数量" min="0">
-        <input type="number" id="projectWeight" placeholder="项目比重(%)" min="0" max="100">
-        <button onclick="calculateScore()">计算评分</button>
-        <button onclick="clearAll()" style="background:#f44336">清除记录</button>
-        <p>当前评分：<span id="scoreResult">0</span> 分</p>
+        <input type="text" id="staffName" placeholder="输入姓名">
+        <button class="add-btn" onclick="addProject()">+ 添加项目</button>
     </div>
 
-    <div id="history">
-        <h3>历史记录（自动保存）</h3>
-        <div id="records"></div>
+    <!-- 项目输入区 -->
+    <div id="projects"></div>
+
+    <!-- 总分展示 -->
+    <div class="input-group">
+        <button class="calc-btn" onclick="calculateAll()">计算总分</button>
+        <span>最终绩效得分：<span id="finalScore" class="total">0</span></span>
     </div>
+</div>
 
-    <script>
-        // 初始化本地存储[8](@ref)
-        let records = JSON.parse(localStorage.getItem('scoreRecords')) || [];
+<script>
+let dataStructure = []; // 存储数据结构：[{project:"", 权重:0, 板块:[{板块名:"",评分:0,权重:0}]}]
 
-        // 计算评分（核心算法）[6,9](@ref)
-        function calculateScore() {
-            const name = document.getElementById('name').value;
-            const projectNum = parseInt(document.getElementById('projectNum').value) || 0;
-            const weight = parseInt(document.getElementById('projectWeight').value) || 0;
+// 添加新项目
+function addProject() {
+    const projectId = Date.now();
+    dataStructure.push({id:projectId, 权重:0, 板块:[]});
 
-            // 验证权重总和（扩展时可添加多项目验证）
-            if(weight < 0 || weight > 100) {
-                alert("比重需在0-100%之间");
-                return;
-            }
+    const projectHTML = `
+    <div class="input-group" data-id="${projectId}">
+        <table>
+            <tr>
+                <td colspan="4">
+                    <input type="text" placeholder="项目名称">
+                    <input type="number" class="project-weight" placeholder="项目权重%" min="0" max="100">
+                    <button class="add-btn" onclick="addSection(${projectId})">+ 添加板块</button>
+                    <button class="add-btn" style="background:#ff5722" onclick="removeProject(${projectId})">- 删除项目</button>
+                </td>
+            </tr>
+            <tbody id="sections-${projectId}"></tbody>
+            <tr><td colspan="4">项目得分：<span class="project-score">0</span></td></tr>
+        </table>
+    </div>`;
+    document.getElementById('projects').insertAdjacentHTML('beforeend', projectHTML);
+}
 
-            // 评分算法：项目数×比重×难度系数[6,10](@ref)
-            const baseScore = projectNum * (weight/100);
-            const difficultyFactor = Math.log(projectNum + 1); // 对数难度系数
-            const finalScore = Math.round(baseScore * difficultyFactor * 10);
+// 添加板块
+function addSection(projectId) {
+    const sectionId = Date.now();
+    const project = dataStructure.find(p => p.id === projectId);
+    project.板块.push({id:sectionId, 评分:0, 权重:0});
 
-            // 显示结果
-            document.getElementById('scoreResult').textContent = finalScore;
+    const sectionHTML = `
+    <tr data-id="${sectionId}">
+        <td><input type="text" placeholder="板块名称"></td>
+        <td><input type="number" class="section-score" placeholder="绩效评分(1-5)" min="1" max="5"></td>
+        <td><input type="number" class="section-weight" placeholder="板块权重%" min="0" max="100"></td>
+        <td><button class="add-btn" style="background:#ff5722" onclick="removeSection(${projectId},${sectionId})">-</button></td>
+    </tr>`;
+    document.querySelector(`#sections-${projectId}`).insertAdjacentHTML('beforeend', sectionHTML);
+}
 
-            // 存储记录
-            const newRecord = {
-                name,
-                projectNum,
-                weight,
-                score: finalScore,
-                timestamp: new Date().toLocaleString()
-            };
-            records.push(newRecord);
-            localStorage.setItem('scoreRecords', JSON.stringify(records));
+// 计算逻辑（核心算法）
+function calculateAll() {
+    let finalScore = 0;
 
-            renderHistory();
-        }
+    dataStructure.forEach(project => {
+        const projectElem = document.querySelector(`[data-id="${project.id}"]`);
+        const projectWeight = parseFloat(projectElem.querySelector('.project-weight').value) || 0;
+
+        let projectScore = 0;
+        const sections = projectElem.querySelectorAll('tr[data-id]');
+        sections.forEach(section => {
+            const score = parseFloat(section.querySelector('.section-score').value) || 0;
+            const weight = parseFloat(section.querySelector('.section-weight').value) || 0;
+            projectScore += score * (weight/100);
+        });
+
+        projectElem.querySelector('.project-score').textContent = projectScore.toFixed(2);
+        finalScore += projectScore * (projectWeight/100);
+    });
+
+    document.getElementById('finalScore').textContent = finalScore.toFixed(2);
+}
+
+// 删除功能
+function removeProject(id) {
+    dataStructure = dataStructure.filter(p => p.id !== id);
+    document.querySelector(`[data-id="${id}"]`).remove();
+}
+function removeSection(projectId, sectionId) {
+    const project = dataStructure.find(p => p.id === projectId);
