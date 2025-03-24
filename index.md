@@ -1,164 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>智能象棋 - GitHub Pages版</title>
+    <meta charset="UTF-8">
+    <title>项目人员评分系统</title>
     <style>
-        #chessboard {
-            width: 560px;
-            height: 620px;
+        body {
+            font-family: '微软雅黑', sans-serif;
+            max-width: 800px;
             margin: 20px auto;
-            border: 2px solid #333;
+            padding: 20px;
+            background: #f0f3f9;
         }
-        .cell {
-            width: 60px;
-            height: 60px;
-            float: left;
-            border: 1px solid #ddd;
-            position: relative;
+        .input-group {
+            margin-bottom: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .black { background: #999; }
-        .piece {
-            width: 50px;
-            height: 50px;
+        input, select {
+            padding: 8px;
             margin: 5px;
-            border-radius: 50%;
-            position: absolute;
-            cursor: pointer;
-            font-size: 40px;
-            text-align: center;
-            line-height: 50px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
         }
-        .red { color: #c00; }
-        .black-piece { color: #000; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        #history {
+            margin-top: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .record {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
     </style>
 </head>
 <body>
-    <div id="chessboard"></div>
+    <div class="input-group">
+        <h2>评分计算器</h2>
+        <input type="text" id="name" placeholder="输入姓名">
+        <input type="number" id="projectNum" placeholder="负责项目数量" min="0">
+        <input type="number" id="projectWeight" placeholder="项目比重(%)" min="0" max="100">
+        <button onclick="calculateScore()">计算评分</button>
+        <button onclick="clearAll()" style="background:#f44336">清除记录</button>
+        <p>当前评分：<span id="scoreResult">0</span> 分</p>
+    </div>
+
+    <div id="history">
+        <h3>历史记录（自动保存）</h3>
+        <div id="records"></div>
+    </div>
+
     <script>
-        // 初始化棋盘
-        const board = document.getElementById('chessboard');
-        const pieces = [];
-        let selectedPiece = null;
+        // 初始化本地存储[8](@ref)
+        let records = JSON.parse(localStorage.getItem('scoreRecords')) || [];
 
-        // 棋盘初始化
-        function initBoard() {
-            const initialLayout = [
-                ['车','马','象','士','将','士','象','马','车'],
-                ['','','','','','','','',''],
-                ['','炮','','','','','','炮',''],
-                ['卒','','卒','','卒','','卒','','卒'],
-                ['','','','','','','','',''],
-                ['','','','','','','','',''],
-                ['兵','','兵','','兵','','兵','','兵'],
-                ['','炮','','','','','','炮',''],
-                ['','','','','','','','',''],
-                ['俥','馬','相','仕','帥','仕','相','馬','俥']
-            ];
+        // 计算评分（核心算法）[6,9](@ref)
+        function calculateScore() {
+            const name = document.getElementById('name').value;
+            const projectNum = parseInt(document.getElementById('projectNum').value) || 0;
+            const weight = parseInt(document.getElementById('projectWeight').value) || 0;
 
-            for (let row = 0; row < 10; row++) {
-                for (let col = 0; col < 9; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = `cell ${(row + col) % 2 ? 'black' : ''}`;
-                    cell.dataset.row = row;
-                    cell.dataset.col = col;
-                    
-                    if (initialLayout[row][col]) {
-                        const piece = createPiece(initialLayout[row][col], row < 5);
-                        cell.appendChild(piece);
-                        pieces.push({
-                            element: piece,
-                            row,
-                            col,
-                            type: initialLayout[row][col]
-                        });
-                    }
-                    
-                    cell.addEventListener('click', handleClick);
-                    board.appendChild(cell);
-                }
+            // 验证权重总和（扩展时可添加多项目验证）
+            if(weight < 0 || weight > 100) {
+                alert("比重需在0-100%之间");
+                return;
             }
+
+            // 评分算法：项目数×比重×难度系数[6,10](@ref)
+            const baseScore = projectNum * (weight/100);
+            const difficultyFactor = Math.log(projectNum + 1); // 对数难度系数
+            const finalScore = Math.round(baseScore * difficultyFactor * 10);
+
+            // 显示结果
+            document.getElementById('scoreResult').textContent = finalScore;
+
+            // 存储记录
+            const newRecord = {
+                name,
+                projectNum,
+                weight,
+                score: finalScore,
+                timestamp: new Date().toLocaleString()
+            };
+            records.push(newRecord);
+            localStorage.setItem('scoreRecords', JSON.stringify(records));
+
+            renderHistory();
         }
-
-        // 创建棋子
-        function createPiece(type, isBlack) {
-            const piece = document.createElement('div');
-            piece.className = `piece ${isBlack ? 'black-piece' : 'red'}`;
-            piece.textContent = type;
-            return piece;
-        }
-
-        // AI决策核心（简化版）
-        function aiMove() {
-            const possibleMoves = [];
-            
-            // 获取所有合法移动
-            pieces.forEach(p => {
-                if (p.element.classList.contains('black-piece')) {
-                    getValidMoves(p).forEach(move => {
-                        possibleMoves.push({ piece: p, ...move });
-                    });
-                }
-            });
-
-            // 简单随机选择（可扩展为Minimax算法）
-            if (possibleMoves.length > 0) {
-                const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-                movePiece(randomMove.piece, randomMove.row, randomMove.col);
-            }
-        }
-
-        // 移动棋子
-        function movePiece(piece, newRow, newCol) {
-            const oldCell = document.querySelector(`[data-row="${piece.row}"][data-col="${piece.col}"]`);
-            const newCell = document.querySelector(`[data-row="${newRow}"][data-col="${newCol}"]`);
-            
-            // 执行移动
-            oldCell.removeChild(piece.element);
-            newCell.appendChild(piece.element);
-            
-            // 更新数据
-            piece.row = newRow;
-            piece.col = newCol;
-        }
-
-        // 点击处理
-        function handleClick(e) {
-            const cell = e.currentTarget;
-            const row = parseInt(cell.dataset.row);
-            const col = parseInt(cell.dataset.col);
-            
-            if (selectedPiece) {
-                // 执行移动
-                movePiece(selectedPiece, row, col);
-                selectedPiece = null;
-                setTimeout(aiMove, 500); // AI回应
-            } else {
-                // 选择棋子
-                if (cell.children.length > 0 && 
-                    !cell.children[0].classList.contains('black-piece')) {
-                    selectedPiece = pieces.find(p => 
-                        p.row === row && p.col === col);
-                    highlightValidMoves(selectedPiece);
-                }
-            }
-        }
-
-        // 棋子移动规则（示例：兵/卒）
-        function getValidMoves(piece) {
-            const moves = [];
-            // 此处添加完整的象棋规则逻辑
-            // 示例：红方兵的移动规则
-            if (piece.type === '兵') {
-                if (piece.row > 0) moves.push({row: piece.row-1, col: piece.col});
-                if (piece.row <= 4) {
-                    if (piece.col > 0) moves.push({row: piece.row, col: piece.col-1});
-                    if (piece.col < 8) moves.push({row: piece.row, col: piece.col+1});
-                }
-            }
-            return moves;
-        }
-
-        initBoard();
-    </script>
-</body>
-</html>
