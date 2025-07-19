@@ -4,5 +4,5 @@
 
 <ul>
   <li> <a href="https://www.zhihu.com/">知乎</a> </li>
-  <li> <a href="https://www.bilibilicom/">bilibili</a> </li>
+  <li> <a href="https://www.bilibili.com/">bilibili</a> </li>
 </ul>
