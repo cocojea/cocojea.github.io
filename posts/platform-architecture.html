@@ -55,6 +55,7 @@
           <a href="#metric">复用度怎么量化</a>
           <a href="#fail">三种典型失败</a>
           <a href="#govern">平台治理</a>
+          <a href="#tier">两层规划：策略与架构书</a>
         </aside>
 
         <article class="prose reveal" style="--d:.08s">
@@ -180,6 +181,16 @@
             平台才算真的成立。
           </p>
 
+          <h2 id="tier">两层规划：策略与架构书</h2>
+          <p>成熟的电子架构平台，规划通常是两层，而不是一份文档一次写到底：</p>
+          <ol>
+            <li><strong>架构策略</strong>：基于竞品对标与产品属性分析，规划平台级方案——回答「这个平台整体怎么做」，产出平台架构方案、整车功能清单、ECU 清单。</li>
+            <li><strong>电子架构书</strong>：在策略之上，结合 ECU 清单分析与功能清单分析，论证各域方案的合理性，落到具体车型——回答「这台车怎么做」，明确拓扑、网络与功能分配。</li>
+          </ol>
+          <p>两层的关系是<strong>「平台 → 项目」的两次裁剪</strong>：策略承担复用与前瞻，架构书承担落地与取舍。跳过策略直接写架构书，每台车都像从零开始；只有策略没有架构书，平台永远落不了地。</p>
+          <blockquote>
+            <b>判据</b>：如果一个平台的「策略」文档和「架构书」文档内容几乎一样，说明要么策略写成了项目方案，要么架构书在抄策略——两者必有一个失效。
+          </blockquote>
           <div class="article-foot">
             <div class="tagrow"><span>电子电气架构</span><span>平台化</span><span>变体管理</span></div>
             <a class="sec-more" href="../archives.html">返回归档 <span aria-hidden="true">→</span></a>

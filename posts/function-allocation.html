@@ -55,6 +55,7 @@
           <a href="#matrix">接口矩阵的字段</a>
           <a href="#timing">时序与超时</a>
           <a href="#change">变更影响分析</a>
+          <a href="#matrix">功能矩阵与调查表</a>
         </aside>
 
         <article class="prose reveal" style="--d:.08s">
@@ -153,6 +154,15 @@
             如果接口改动不是兼容的，中间状态就会出现「功能时好时坏」的窗口期。
           </p>
 
+          <h2 id="matrix">功能矩阵与调查表</h2>
+          <p>功能分配在实际流程里，靠三样东西落地，而不是靠一张架构图：</p>
+          <ul>
+            <li><strong>功能矩阵</strong>：功能 × 节点的打点矩阵，明确「哪个功能由哪个节点实现」，是可评审的功能分配载体。</li>
+            <li><strong>通信调查表</strong>：各节点填写的信号收发清单，汇总后生成通信列表/数据库，作为全车网络的唯一事实源。</li>
+            <li><strong>诊断调查表</strong>：各节点上报的诊断需求，汇总成诊断规范与诊断拓扑。</li>
+          </ul>
+          <p>「调查表」负责采集，「清单/数据库」负责汇总。这里的纪律是<strong>单一事实源</strong>：信号定义只存在于汇总后的通信列表里，任何节点私自改自己的调查表而不回流，就会产生版本分叉。</p>
+          <p>诊断层面还要补齐一张<strong>网络诊断拓扑图</strong>：把涉及以太网、CAN FD、CAN、LIN 等所有诊断节点的连接关系画清楚，它是下线检测与售后诊断共用的地图。</p>
           <div class="article-foot">
             <div class="tagrow"><span>电子电气架构</span><span>接口设计</span><span>功能分配</span></div>
             <a class="sec-more" href="../archives.html">返回归档 <span aria-hidden="true">→</span></a>

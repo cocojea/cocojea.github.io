@@ -55,6 +55,10 @@
           <a href="#cross">三个典型越界</a>
           <a href="#owner">接口归谁</a>
           <a href="#change">变更审批链</a>
+          <a href="#flow">开发流程主线</a>
+          <a href="#safety">功能安全主线</a>
+          <a href="#map">交付物与责任</a>
+          <a href="#kpi">流程绩效</a>
         </aside>
 
         <article class="prose reveal" style="--d:.08s">
@@ -64,7 +68,7 @@
             <b>电子电气架构里的职能边界</b>
           </div>
           <h1 class="article-title">电子电气架构里的职能边界</h1>
-          <div class="article-meta">2026-11-07 · 8 MIN READ · 电子电气架构 · 角色边界</div>
+          <div class="article-meta">2026-11-07 · 10 MIN READ · 电子电气架构 · 角色边界</div>
 
           <h2 id="why">边界为什么比能力重要</h2>
           <p>
@@ -155,6 +159,50 @@
             <b>判据</b>：如果一次变更之后，DBC 和测试用例没有同时更新，那这次变更等于没做完。
           </blockquote>
 
+          <h2 id="flow">开发流程主线</h2>
+          <p>一份可落地的电子架构开发流程，本质是把「架构决策」拆成一串有先后、有责任人、有交付物的活动。抽掉企业专有术语后，主链路通常是八段：</p>
+          <ol>
+            <li><strong>项目输入</strong>：产品定义、项目计划、车型配置表、产品需求清单——回答「造什么车」</li>
+            <li><strong>架构策略</strong>：基于竞品对标与产品属性分析，产出平台级架构方案、整车功能清单、ECU 清单</li>
+            <li><strong>系统选型</strong>：各专业域在技术路线、性能、成本之间做取舍，收敛子系统方案</li>
+            <li><strong>架构书</strong>：整合为正式电子架构书，明确拓扑、网络与功能分配，作为详细设计基准</li>
+            <li><strong>企标规范</strong>：释放网络开发规范、通信列表/数据库、诊断规范、诊断调查表</li>
+            <li><strong>零部件开发</strong>：各专业据此开展子系统详细设计与软件实现</li>
+            <li><strong>验证与整改</strong>：安全测试、网络诊断测试、产线电检，问题回灌到软件与线束</li>
+            <li><strong>架构发布</strong>：整合多维度验证结果，锁定最终架构作为量产与售后基准</li>
+          </ol>
+          <p>其中「架构策略」与「架构书」通常被设为关键控制点（KCP）——它们决定了后续所有工作的成本下限，这两个节点一旦定错，改起来最贵。</p>
+
+          <h2 id="safety">功能安全的主线</h2>
+          <p>功能安全不是独立于架构之外的另一套流程，而是贯穿同一条主线的平行线，落点是四份连续交付物：</p>
+          <ul>
+            <li><strong>HARA</strong>：危害分析与风险评估，识别失效场景与风险等级</li>
+            <li><strong>安全目标 SG</strong>：由 HARA 推导出的整车级安全目标</li>
+            <li><strong>功能安全需求 FSR</strong>：把安全目标分配到功能层面</li>
+            <li><strong>技术安全需求 VTSR</strong>：落到系统/硬件/软件的具体技术约束</li>
+          </ul>
+          <p>四份文档从抽象到具体逐层细化，最终纳入零部件开发规范，成为详细设计与验证的约束来源；验证完成后沉淀为整车安全档案。</p>
+
+          <h2 id="map">交付物与责任</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>交付物</th><th>责任角色</th><th>主要输入</th></tr></thead>
+              <tbody>
+                <tr><td>架构策略 / 功能清单 / ECU 清单</td><td>架构负责人</td><td>产品定义、项目计划、配置表</td></tr>
+                <tr><td>电子架构书</td><td>架构负责人</td><td>功能清单、各域选型方案</td></tr>
+                <tr><td>网络开发规范 / 通信列表</td><td>架构负责人</td><td>ECU 清单、通信调查表</td></tr>
+                <tr><td>诊断规范</td><td>架构负责人</td><td>诊断调查表、诊断拓扑</td></tr>
+                <tr><td>功能安全需求 FSR / VTSR</td><td>安全负责人</td><td>PRD、子系统技术规范</td></tr>
+                <tr><td>测试需求规范</td><td>测试负责人</td><td>ECU 清单、企标规范</td></tr>
+                <tr><td>下线检测需求规范</td><td>架构负责人</td><td>工程配置表、零部件检测需求</td></tr>
+                <tr><td>零部件技术规范 / 软件</td><td>零部件负责人</td><td>各企标规范、安全需求</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 id="kpi">流程绩效：盯交付物，不盯活动</h2>
+          <p>这类流程唯一值得挂出来的指标，通常只有一个：<strong>节点交付物完成率</strong>，定义为「完整性 × 正确性 × 有效性」，目标 100%、底线 85%。</p>
+          <p>它的隐含信息是：流程管理盯的是<strong>交付物有没有按时、按质产出</strong>，而不是「会议开没开、评审走没走」。一旦把活动本身当成绩效，流程就会退化成盖章。</p>
           <div class="article-foot">
             <div class="tagrow"><span>电子电气架构</span><span>角色边界</span><span>RACI</span></div>
             <a class="sec-more" href="../archives.html">返回归档 <span aria-hidden="true">→</span></a>
