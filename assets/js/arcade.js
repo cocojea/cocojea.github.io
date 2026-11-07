@@ -216,7 +216,7 @@
       if (map[e.key.toLowerCase()]) { e.preventDefault(); setDir(map[e.key.toLowerCase()]); }
       else if (e.key === " " || e.key.toLowerCase() === "p") { e.preventDefault(); togglePause(); }
     });
-    cv.addEventListener("click", function () { cv.focus(); });
+    cv.addEventListener("click", function () { cv.focus(); if (!running) start(); });
     var dpad = $("#arcade .dpad");
     if (dpad) {
       dpad.querySelectorAll("button").forEach(function (b) {
