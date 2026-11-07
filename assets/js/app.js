@@ -95,6 +95,21 @@
     }
   }
 
+  /* ---------- 关于页座右铭打字机 ---------- */
+  var motto = $("#motto");
+  if (motto) {
+    var mtext = motto.textContent.replace(/\s+/g, " ").trim();
+    if (reduce || root.classList.contains("no-anim")) {
+      motto.textContent = mtext;
+    } else {
+      var mci = 0;
+      (function mtype() {
+        motto.textContent = mtext.slice(0, mci);
+        mci++;
+        if (mci <= mtext.length) setTimeout(mtype, 85);
+      })();
+    }
+  }
   /* ---------- 文章目录高亮 ---------- */
   var tocLinks = $$(".toc a[href^='#']");
   var heads = tocLinks.map(function (a) { return document.getElementById(a.getAttribute("href").slice(1)); });
