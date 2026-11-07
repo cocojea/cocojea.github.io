@@ -1,114 +1,83 @@
-/* arcade.js — 小游戏：CAN 信号解码挑战 + 霓虹贪吃蛇
+/* arcade.js — 小游戏：指示灯翻牌配对 + 霓虹贪吃蛇
    纯前端、零依赖、可中断（页面隐藏时自动暂停） */
 (function () {
   "use strict";
   var $ = function (s, c) { return (c || document).querySelector(s); };
 
-  /* ============ 1. SIGNAL DECODER · CAN 信号解码 ============ */
-  var D = $("#decoder");
-  if (D) {
-    var QUESTIONS = [
-      { frame: "00 00 64 00 00 00 00 00", spec: "车速 · 字节2–3 · Intel 16位无符号 · factor 1.5 → km/h", answer: 150, opts: [150, 90, 375, 100] },
-      { frame: "00 6E 00 00 00 00 00 00", spec: "水温 · 字节1 · 8位无符号 · offset -40 → °C", answer: 70, opts: [70, 40, 100, 30] },
-      { frame: "00 00 A0 0F 00 00 00 00", spec: "转速 · 字节2–3 · Intel 16位 · factor 0.25 → rpm", answer: 1000, opts: [1000, 4000, 250, 16000] },
-      { frame: "00 00 00 50 00 00 00 00", spec: "电量 · 字节3 · 8位无符号 · factor 1 → %", answer: 80, opts: [80, 50, 120, 40] },
-      { frame: "00 00 00 00 F4 01 00 00", spec: "里程 · 字节4–5 · Intel 16位 · factor 0.1 → km", answer: 50, opts: [50, 500, 5, 100] }
+  /* ============ 1. TELLTALE MATCH · 指示灯翻牌配对 ============ */
+  var MG = $("#matchGrid");
+  if (MG) {
+    var ICONS = [
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="17" height="8" rx="1.5"/><path d="M21 10v4"/><path d="M6.5 10.5v3M10 10.5v3"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v9"/><circle cx="12" cy="16.5" r="4.5"/><path d="M9.5 16.5h5"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 4.2 5.5 6.8 5.5 10a5.5 5.5 0 0 1-11 0c0-3.2 2.3-5.8 5.5-10z"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3 20h18z"/><path d="M12 9v4.5"/><circle cx="12" cy="16.4" r="0.9"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2"/><path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5 19.5 19.5"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a7 7 0 0 1 7 7"/><path d="M12 5a7 7 0 0 0-7 7"/><path d="M6 16h12"/><path d="M12 14v2"/><circle cx="12" cy="18.4" r="0.9"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>'
     ];
+    var LABELS = ["电池", "水温", "机油", "报警", "转向", "安全带", "胎压", "发动机"];
 
-    var startBtn = $("#decStart"), scoreEl = $("#decScore"), bestEl = $("#decBest"),
-        qEl = $("#decQ"), timerEl = $("#decTimer"), frameEl = $("#decFrame"),
-        specEl = $("#decSpec"), optsEl = $("#decOpts");
+    var movesEl = $("#matchMoves"), bestEl = $("#matchBest"), startBtn = $("#matchStart"), resultEl = $("#matchResult");
+    var deck = [], first = null, second = null, lock = false, moves = 0, matched = 0;
+    var best = parseInt(localStorage.getItem("matchBest") || "0", 10);
+    if (bestEl) bestEl.textContent = best > 0 ? best : "—";
 
-    var best = parseInt(localStorage.getItem("decBest") || "0", 10);
-    if (bestEl) bestEl.textContent = best;
+    function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
 
-    var state = "idle", idx = 0, score = 0, timer = null, remain = 0, answering = false;
-
-    function shuffle(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
-    function grade(s) { return s >= 100 ? "解码大师" : s >= 60 ? "熟练" : s >= 40 ? "入门" : "多练练"; }
-
-    function lock() {
-      answering = false;
-      clearInterval(timer);
-      optsEl.querySelectorAll("button").forEach(function (b) {
-        b.disabled = true; b.classList.add("dim");
+    function render() {
+      MG.innerHTML = "";
+      deck = shuffle([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7]);
+      deck.forEach(function (idx) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "match-card";
+        b.dataset.icon = idx;
+        b.innerHTML = '<span class="mc-inner"><span class="mc-back">?</span><span class="mc-front">' + ICONS[idx] + '<em>' + LABELS[idx] + '</em></span></span>';
+        b.addEventListener("click", function () { flip(b); });
+        MG.appendChild(b);
       });
     }
 
-    function reveal(q) {
-      optsEl.querySelectorAll("button").forEach(function (b) {
-        if (parseInt(b.textContent, 10) === q.answer) b.classList.add("ok");
-      });
+    function grade(m) { return m <= 16 ? "一帧速配" : m <= 20 ? "记性不错" : m <= 26 ? "还行" : "再练练"; }
+
+    function flip(card) {
+      if (lock || card.classList.contains("flipped") || card.classList.contains("matched")) return;
+      card.classList.add("flipped");
+      if (!first) { first = card; return; }
+      second = card;
+      moves++; if (movesEl) movesEl.textContent = moves;
+      if (first.dataset.icon === second.dataset.icon) {
+        lock = true;
+        var a = first, b = second; first = second = null;
+        setTimeout(function () {
+          a.classList.add("matched"); b.classList.add("matched");
+          lock = false; matched++;
+          if (matched === 8) win();
+        }, 350);
+      } else {
+        lock = true;
+        var c = first, d = second; first = second = null;
+        setTimeout(function () { c.classList.remove("flipped"); d.classList.remove("flipped"); lock = false; }, 750);
+      }
     }
 
-    function end() {
-      state = "idle"; clearInterval(timer);
-      if (frameEl) frameEl.textContent = "-- -- -- -- -- -- -- --";
-      if (specEl) specEl.textContent = "完成！得分 " + score + " · " + grade(score);
-      if (optsEl) optsEl.innerHTML = "";
-      if (qEl) qEl.textContent = "完成";
-      if (timerEl) timerEl.textContent = "—";
-      if (score > best) { best = score; localStorage.setItem("decBest", String(best)); if (bestEl) bestEl.textContent = best; }
+    function win() {
+      if (resultEl) resultEl.textContent = "配对完成！用了 " + moves + " 步 · " + grade(moves);
+      if (best === 0 || moves < best) { best = moves; localStorage.setItem("matchBest", String(best)); if (bestEl) bestEl.textContent = best; }
       if (startBtn) startBtn.textContent = "再玩一次";
     }
 
-    function show() {
-      var q = QUESTIONS[idx];
-      qEl.textContent = "第 " + (idx + 1) + " / " + QUESTIONS.length + " 题";
-      frameEl.textContent = q.frame;
-      specEl.textContent = q.spec;
-      optsEl.innerHTML = "";
-      shuffle(q.opts).forEach(function (v) {
-        var b = document.createElement("button");
-        b.type = "button"; b.textContent = v;
-        b.addEventListener("click", function () { choose(v, b); });
-        optsEl.appendChild(b);
-      });
-      remain = 15;
-      timerEl.textContent = remain + "s";
-      answering = true;
-      timer = setInterval(function () {
-        remain--;
-        timerEl.textContent = remain + "s";
-        if (remain <= 0) { clearInterval(timer); timeout(); }
-      }, 1000);
-    }
-
-    function choose(v, btn) {
-      if (!answering) return;
-      lock();
-      var q = QUESTIONS[idx];
-      if (v === q.answer) {
-        score += 20 + Math.max(0, remain);
-        scoreEl.textContent = score;
-        btn.classList.add("ok");
-      } else {
-        btn.classList.add("bad");
-        reveal(q);
-      }
-      setTimeout(next, 900);
-    }
-
-    function timeout() {
-      if (!answering) return;
-      lock();
-      reveal(QUESTIONS[idx]);
-      setTimeout(next, 900);
-    }
-
-    function next() {
-      idx++;
-      if (idx >= QUESTIONS.length) { end(); return; }
-      show();
-    }
-
     startBtn.addEventListener("click", function () {
-      if (state === "playing") return;
-      state = "playing"; idx = 0; score = 0;
-      scoreEl.textContent = "0";
-      startBtn.textContent = "答题中…";
-      show();
+      moves = 0; matched = 0; first = second = null; lock = false;
+      if (movesEl) movesEl.textContent = "0";
+      if (resultEl) resultEl.textContent = "翻开两张，找相同的指示灯";
+      if (startBtn) startBtn.textContent = "进行中…";
+      render();
     });
+
+    render();
   }
 
   /* ============ 2. NEON SNAKE · 霓虹贪吃蛇 ============ */
@@ -177,10 +146,7 @@
       snake.unshift(head);
       if (head.x === food.x && head.y === food.y) {
         score++; setScore();
-        if (score > best) {
-          best = score; localStorage.setItem("snakeBest", String(best));
-          if (bestEl) bestEl.textContent = best;
-        }
+        if (score > best) { best = score; localStorage.setItem("snakeBest", String(best)); if (bestEl) bestEl.textContent = best; }
         speed = Math.max(65, 110 - score * 6);
         placeFood();
       } else {
@@ -190,17 +156,12 @@
       timer = setTimeout(step, speed);
     }
 
-    function gameOver() {
-      running = false; clearTimeout(timer);
-      draw(); if (startBtn) startBtn.textContent = "再玩一次";
-    }
-
+    function gameOver() { running = false; clearTimeout(timer); draw(); if (startBtn) startBtn.textContent = "再玩一次"; }
     function start() {
       reset(); running = true; draw();
       if (startBtn) startBtn.textContent = "进行中…";
       cv.focus(); clearTimeout(timer); timer = setTimeout(step, speed);
     }
-
     function setDir(d) {
       if (!running) return;
       if ((d.x && d.x === -dir.x) || (d.y && d.y === -dir.y)) return;
@@ -209,16 +170,10 @@
 
     startBtn.addEventListener("click", start);
     cv.addEventListener("keydown", function (e) {
-      var map = {
-        arrowleft: { x: -1, y: 0 }, a: { x: -1, y: 0 },
-        arrowup: { x: 0, y: -1 }, w: { x: 0, y: -1 },
-        arrowdown: { x: 0, y: 1 }, s: { x: 0, y: 1 },
-        arrowright: { x: 1, y: 0 }, d: { x: 1, y: 0 }
-      };
+      var map = { arrowleft: { x: -1, y: 0 }, a: { x: -1, y: 0 }, arrowup: { x: 0, y: -1 }, w: { x: 0, y: -1 }, arrowdown: { x: 0, y: 1 }, s: { x: 0, y: 1 }, arrowright: { x: 1, y: 0 }, d: { x: 1, y: 0 } };
       if (map[e.key.toLowerCase()]) { e.preventDefault(); setDir(map[e.key.toLowerCase()]); }
     });
     cv.addEventListener("click", function () { cv.focus(); });
-
     var dpad = $("#arcade .dpad");
     if (dpad) {
       dpad.querySelectorAll("button").forEach(function (b) {
@@ -229,9 +184,7 @@
         });
       });
     }
-    document.addEventListener("visibilitychange", function () {
-      if (document.hidden && running) gameOver();
-    });
+    document.addEventListener("visibilitychange", function () { if (document.hidden && running) gameOver(); });
     reset();
   }
 })();

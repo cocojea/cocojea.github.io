@@ -490,3 +490,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
 .dec-opts button.ok{background:rgba(204,255,0,.15);border-color:var(--acid);color:var(--acid)}
 .dec-opts button.bad{background:rgba(255,46,136,.15);border-color:var(--magenta);color:var(--magenta)}
 .dec-opts button.dim{opacity:.4}
+/* ===== 指示灯翻牌配对 ===== */
+.match-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.match-card{position:relative;aspect-ratio:1;background:transparent;border:none;padding:0;cursor:pointer;perspective:700px}
+.mc-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .45s var(--ease)}
+.match-card.flipped .mc-inner{transform:rotateY(180deg)}
+.mc-back,.mc-front{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  border:1px solid var(--line2);background:#0a0a14}
+.mc-back{color:var(--faint);font-family:var(--mono);font-size:18px}
+.mc-front{transform:rotateY(180deg);color:var(--cyan)}
+.mc-front svg{width:24px;height:24px}
+.mc-front em{font-style:normal;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--dim)}
+.match-card.matched .mc-front{border-color:var(--acid);color:var(--acid);box-shadow:0 0 18px rgba(204,255,0,.35)}
+.match-card.matched .mc-front em{color:var(--acid)}

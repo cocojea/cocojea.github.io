@@ -221,16 +221,12 @@
 
       <div class="arcade-grid">
         <div class="game-card reveal">
-          <div class="game-head"><span class="g-name">SIGNAL DECODER</span><span class="g-sub">CAN 信号解码挑战</span></div>
-                    <div class="decoder" id="decoder">
-            <div class="dec-head"><span id="decQ">第 1 / 5 题</span><span class="t" id="decTimer">15s</span></div>
-            <div class="dec-frame"><span class="lbl">FRAME</span><code id="decFrame">-- -- -- -- -- -- -- --</code></div>
-            <div class="dec-spec" id="decSpec">根据 DBC 定义，计算该信号的物理值</div>
-            <div class="dec-opts" id="decOpts"></div>
-          </div>
+          <div class="game-head"><span class="g-name">TELLTALE MATCH</span><span class="g-sub">指示灯翻牌配对</span></div>
+                    <div class="match-grid" id="matchGrid"></div>
+          <p class="g-result" id="matchResult"></p>
           <div class="game-foot">
-            <span class="g-score">得分 <b id="decScore">0</b> · 最佳 <b id="decBest">0</b></span>
-            <button type="button" class="chip" id="decStart">开始</button>
+            <span class="g-score">步数 <b id="matchMoves">0</b> · 最佳 <b id="matchBest">—</b></span>
+            <button type="button" class="chip" id="matchStart">开始</button>
           </div>
         </div>
 
