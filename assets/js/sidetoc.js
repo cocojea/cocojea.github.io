@@ -1,5 +1,5 @@
-/* sidetoc.js — 右侧折叠目录
-   默认收起，点击展开；文章页已有 .toc 时自动跳过 */
+/* sidetoc.js — 左侧目录（默认展开，可点击收起）
+   文章页已有 .toc 时自动跳过 */
 (function () {
   "use strict";
   var $ = function (s, c) { return (c || document).querySelector(s); };
@@ -19,8 +19,7 @@
   var tab = document.createElement("button");
   tab.type = "button";
   tab.className = "side-toc-tab";
-  tab.setAttribute("aria-expanded", "false");
-  tab.innerHTML = '<span class="tic">&#9776;</span><span class="txt">目录</span>';
+  tab.setAttribute("aria-expanded", "true");
 
   var ol = document.createElement("ol");
   items.forEach(function (it) {
@@ -31,7 +30,6 @@
       e.preventDefault();
       var el = document.getElementById(it.id);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      setOpen(false);
     });
     var li = document.createElement("li");
     li.appendChild(a);
@@ -45,16 +43,20 @@
 
   var wrap = document.createElement("div");
   wrap.className = "side-toc";
-  wrap.appendChild(panel);
-  wrap.appendChild(tab);
+  wrap.appendChild(tab);   // 左：收起把手
+  wrap.appendChild(panel); // 右：目录面板
   document.body.appendChild(wrap);
 
-  var open = false;
+  var open = true;
   function setOpen(v) {
     open = v;
     wrap.classList.toggle("open", v);
     tab.setAttribute("aria-expanded", String(v));
+    tab.innerHTML = v
+      ? '<span class="tic">&#10005;</span><span class="txt">收起</span>'
+      : '<span class="tic">&#9776;</span><span class="txt">目录</span>';
   }
+  setOpen(true);
   tab.addEventListener("click", function () { setOpen(!open); });
 
   document.addEventListener("click", function (e) {

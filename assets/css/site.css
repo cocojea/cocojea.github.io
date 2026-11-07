@@ -456,9 +456,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
 .dpad button:hover{color:var(--cyan);border-color:var(--cyan)}
 @media (max-width:900px){.arcade-grid{grid-template-columns:1fr}}
 /* ===== 侧边折叠目录 ===== */
-.side-toc{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:96;display:flex;align-items:center}
+.side-toc{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:96;display:flex;align-items:center}
 .side-toc-tab{display:flex;flex-direction:column;align-items:center;gap:6px;
-  padding:14px 8px;background:rgba(8,8,14,.85);border:1px solid var(--line2);border-right:none;
+  padding:14px 8px;background:rgba(8,8,14,.85);border:1px solid var(--line2);border-left:none;
   color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
   transition:.25s;backdrop-filter:blur(8px)}
 .side-toc-tab .tic{font-size:14px;color:var(--cyan)}
@@ -466,7 +466,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
 .side-toc.open .side-toc-tab{color:var(--magenta);border-color:var(--magenta)}
 .side-toc-panel{width:0;overflow:hidden;max-height:70vh;opacity:0;
   transition:width .3s var(--ease),opacity .3s var(--ease);
-  background:rgba(8,8,14,.92);border:1px solid var(--line2);border-right:none;
+  background:rgba(8,8,14,.92);border:1px solid var(--line2);border-left:none;
   backdrop-filter:blur(10px)}
 .side-toc.open .side-toc-panel{width:224px;opacity:1}
 .side-toc-panel ol{list-style:none;margin:0;padding:12px 0;min-width:208px}
