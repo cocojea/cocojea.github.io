@@ -263,13 +263,14 @@
           <div class="game-head"><span class="g-name">NEON SNAKE</span><span class="g-sub">霓虹贪吃蛇</span></div>
           <canvas id="snake" width="360" height="360" tabindex="0" aria-label="贪吃蛇游戏区"></canvas>
           <div class="game-foot">
-            <span class="g-score">得分 <b id="snakeScore">0</b> · 最高 <b id="snakeBest">0</b></span>
+            <span class="g-score">得分 <b id="snakeScore">0</b> · 长度 <b id="snakeLen">3</b> · 最高 <b id="snakeBest">0</b></span>
             <span class="dpad">
               <button type="button" data-dir="left" aria-label="左">←</button>
               <button type="button" data-dir="up" aria-label="上">↑</button>
               <button type="button" data-dir="down" aria-label="下">↓</button>
               <button type="button" data-dir="right" aria-label="右">→</button>
             </span>
+            <button type="button" class="chip" id="snakePause">暂停</button>
             <button type="button" class="chip" id="snakeStart">开始</button>
           </div>
         </div>
