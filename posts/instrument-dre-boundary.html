@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#05050a">
+<title>组合仪表 DRE 的责任边界 · cocojee blog</title>
+<meta name="description" content="DRE 到底负责什么、四个交付节点、交付物清单、与 FO/SO 的分工，以及最容易出事的五个接口。">
+<meta name="author" content="cocojee">
+<meta property="og:type" content="article">
+<meta property="og:title" content="组合仪表 DRE 的责任边界">
+<meta property="og:description" content="从需求冻结到 SOP，DRE 的交付物、分工边界与五个高危接口。">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+
+<div class="progress"><i></i></div>
+
+<div class="bg" aria-hidden="true">
+  <div class="bg-glow"></div>
+  <div class="grid-floor"></div>
+  <div class="scanlines"></div>
+  <div class="sweep"></div>
+  <div class="noise"></div>
+  <div class="vignette"></div>
+</div>
+
+<div class="cursor" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="../index.html">cocojee<b>//</b>blog<span class="cursorblk"></span></a>
+  <nav class="nav-links" aria-label="主导航">
+    <a href="../index.html">首页</a>
+    <a href="../archives.html">归档</a>
+    <a href="../about.html">关于</a>
+    <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+  <div class="status"><i></i>SYSTEM ONLINE</div>
+</header>
+
+<main>
+
+  <section class="sec" style="padding-top:calc(66px + clamp(48px,7vw,80px))">
+    <div class="wrap">
+      <div class="article-grid">
+
+        <aside class="toc reveal">
+          <span class="toc-label">目录 / INDEX</span>
+          <a href="#scope" class="active">DRE 到底负责什么</a>
+          <a href="#nodes">四个交付节点</a>
+          <a href="#deliverables">交付物清单</a>
+          <a href="#split">与 FO / SO 的分工</a>
+          <a href="#pitfalls">五个高危接口</a>
+          <a href="#checklist">收尾清单</a>
+        </aside>
+
+        <article class="prose reveal" style="--d:.08s">
+          <div class="crumb">
+            <span><a href="../index.html">首页</a></span><span>/</span>
+            <span><a href="../archives.html">汽车电子</a></span><span>/</span>
+            <b>组合仪表 DRE 的责任边界</b>
+          </div>
+          <h1 class="article-title">组合仪表 DRE 的责任边界</h1>
+          <div class="article-meta">2026-09-12 · 7 MIN READ · 汽车电子 · DRE</div>
+
+          <h2 id="scope">DRE 到底负责什么</h2>
+          <p>
+            DRE 是 <strong>Design / Development Responsible Engineer</strong>，字面是「设计开发责任人」，
+            实际落到项目里，是<strong>这个零部件从承接需求到量产后维护的唯一责任接口</strong>。
+            它不是一个「画图岗」，也不是「催供应商的岗」，而是技术状态的最终背书人。
+          </p>
+          <p>拆开看是三段责任，缺一段都会在量产后还回来找你：</p>
+          <ul>
+            <li><strong>需求承接</strong>：把整车层面的功能描述，翻译成可验证的零部件指标</li>
+            <li><strong>方案实现</strong>：定接口、定边界、定失效策略，并证明它成立</li>
+            <li><strong>量产维护</strong>：版本、变更、问题闭环，保证技术状态始终一致</li>
+          </ul>
+          <blockquote>
+            <b>判断标准</b>：出现任何一个仪表相关的问题，如果没人能立刻说出「谁定义、谁验证、谁批准变更」，
+            那这个项目的 DRE 责任就是没闭环的。
+          </blockquote>
+
+          <h2 id="nodes">四个交付节点</h2>
+          <ol>
+            <li><strong>需求冻结</strong>：PRD / SRD 完成评审并基线化，此后变更走 ECR</li>
+            <li><strong>方案冻结</strong>：接口矩阵（IC）、DFMEA、BOM、图纸定版，供应商锁定软硬件版本</li>
+            <li><strong>样件验证</strong>：DVP&amp;R 全部执行完，问题清单 A 类清零</li>
+            <li><strong>SOP</strong>：量产状态确认、技术文件归档、售后与备件接口交接</li>
+          </ol>
+          <p>
+            节点之间最常见的失控，是<strong>「方案冻结了但接口还没对齐」</strong>——
+            尤其是仪表与网关、车身控制器之间的信号来源，往往在样件阶段才发现两边各接了一路。
+          </p>
+
+          <h2 id="deliverables">交付物清单</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>交付物</th><th>回答什么问题</th><th>失效后果</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>PRD / SRD</td><td>要做什么、被谁使用</td><td>需求漂移，测试无依据</td></tr>
+                <tr><td>接口矩阵 IC</td><td>和谁交换什么、周期多久</td><td>信号缺失/重复，联调返工</td></tr>
+                <tr><td>DVP&amp;R</td><td>怎么证明它成立</td><td>问题逃逸到量产</td></tr>
+                <tr><td>DFMEA</td><td>失效模式与探测手段</td><td>高风险项无预防措施</td></tr>
+                <tr><td>BOM / 图纸</td><td>物料与几何状态</td><td>装了不对的件</td></tr>
+                <tr><td>ECR / ECO</td><td>变更是否被批准并落地</td><td>台架对、实车不对</td></tr>
+                <tr><td>问题清单</td><td>每个问题的闭环证据</td><td>问题反复，责任不清</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 id="split">与 FO / SO 的分工</h2>
+          <p>
+            三个角色经常被混着叫，实际边界可以用一句话切开：
+          </p>
+          <ul>
+            <li><strong>FO（Feature Owner）</strong>定「做什么、为什么」——用户场景、功能需求、验收标准</li>
+            <li><strong>SO（System Owner）</strong>定「怎么连」——系统边界、接口、时序、失效降级</li>
+            <li><strong>DRE</strong>定「做出来、验明白、管到底」——实现方案、验证证据、量产技术状态</li>
+          </ul>
+          <p>
+            实践中越界最典型的是：FO 直接给 DRE 一个界面稿，SO 直接给一个信号列表，
+            然后 DRE 拿着两份互相矛盾的材料开工。正确做法是把冲突显性化——
+            <strong>由 SO 出接口基线，FO 出功能基线，DRE 只对「基线是否可实现」提异议</strong>，
+            而不是在实现阶段替上游做决策。
+          </p>
+
+          <h2 id="pitfalls">五个高危接口</h2>
+          <ol>
+            <li>
+              <strong>信号来源不唯一</strong>：同一路车速既有网关转发又有硬线，两路超时策略不一致，
+              表现为「偶发跳变」。
+            </li>
+            <li>
+              <strong>唤醒源与休眠冲突</strong>：仪表被 CAN 唤醒后立即进入显示，但此时整车还没上电，
+              出现「黑屏闪一下」。
+            </li>
+            <li>
+              <strong>KL15 掉电存储窗口</strong>：掉电到 NVM 写完之间只有几十毫秒，
+              小计里程、用户设置最容易丢。
+            </li>
+            <li>
+              <strong>背光调光曲线</strong>：整车给的占空比与仪表亮度不是线性关系，
+              夜间最低亮度刺眼、白天又偏暗。
+            </li>
+            <li>
+              <strong>样件状态与技术状态不一致</strong>：台架上是 V2 软件，实车装的是 V1，
+              问题复现不了，白白排查两周。
+            </li>
+          </ol>
+
+          <h2 id="checklist">收尾清单</h2>
+          <ul>
+            <li>接口矩阵的每一行，都能对应到一个 DBC 报文和一个测试用例</li>
+            <li>每个 A 类问题都有「复现条件 + 根因 + 整改 + 回归」四段证据</li>
+            <li>供应商交付版本与本方台架版本完全一致，且有版本记录</li>
+            <li>售后手册里没有出现「以实车为准」这类无法追溯的描述</li>
+          </ul>
+          <p>
+            这四行看起来像流程话，但它们是量产之后你还能睡得着觉的原因。
+          </p>
+
+          <div class="article-foot">
+            <div class="tagrow"><span>DRE</span><span>汽车电子</span><span>流程</span></div>
+            <a class="sec-more" href="../archives.html">返回归档 <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-word">COCOJEE</div>
+  <div class="foot-grid">
+    <div class="foot-links">
+      <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../archives.html">归档</a>
+      <a href="../about.html">关于</a>
+    </div>
+    <div class="foot-meta">
+      © <span data-year>2026</span> <b>cocojee</b> · cocojee blog<br>
+      POWERED BY <b>GITHUB PAGES</b> · ZERO BUILD
+    </div>
+  </div>
+</footer>
+
+<a class="totop" href="#" aria-label="回到顶部">↑</a>
+
+<script src="../assets/js/app.js"></script>
+  <script src="../assets/js/fx.js"></script>
+</body>
+</html>

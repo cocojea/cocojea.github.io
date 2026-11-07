@@ -1,430 +1,377 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 8.1.2">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
-  </script>
-
-  <meta name="description" content="CAN FD、仪表系统、座舱电子、UDS诊断、汽车电子研发经验分享">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#05050a">
+<title>cocojee blog</title>
+<meta name="description" content="座舱仪表模块 DRE/SO/FO 的研发笔记：CAN 信号联调、报警策略、平台化复用、供应商管理与量产问题闭环。">
+<meta name="author" content="cocojee">
 <meta property="og:type" content="website">
-<meta property="og:title" content="汽车电子研发笔记">
-<meta property="og:url" content="http://example.com/index.html">
-<meta property="og:site_name" content="汽车电子研发笔记">
-<meta property="og:description" content="CAN FD、仪表系统、座舱电子、UDS诊断、汽车电子研发经验分享">
+<meta property="og:title" content="cocojee blog">
+<meta property="og:description" content="座舱仪表模块 DRE/SO/FO 的研发笔记：CAN 信号联调、报警策略、平台化复用与量产问题闭环。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:author" content="cocojee">
-<meta property="article:tag" content="CAN FD">
-<meta property="article:tag" content="ISO26262">
-<meta property="article:tag" content="UDS诊断">
-<meta property="article:tag" content="仪表系统">
-<meta property="article:tag" content="座舱系统">
-<meta property="article:tag" content="汽车电子">
-<meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="http://example.com/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : true,
-    isPost : false,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>汽车电子研发笔记</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css">
+<script>document.documentElement.classList.add("js");</script>
 </head>
+<body>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
+<div class="progress"><i></i></div>
 
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">汽车电子研发笔记</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">仪表与座舱系统开发记录</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
+<div class="bg" aria-hidden="true">
+  <div class="bg-glow"></div>
+  <div class="grid-floor"></div>
+  <div class="scanlines"></div>
+  <div class="sweep"></div>
+  <div class="noise"></div>
+  <div class="vignette"></div>
 </div>
 
+<div class="cursor" aria-hidden="true"></div>
 
+<header class="nav">
+  <a class="brand" href="index.html">cocojee<b>//</b>blog<span class="cursorblk"></span></a>
+  <nav class="nav-links" aria-label="主导航">
+    <a href="index.html" class="on">首页</a>
+    <a href="archives.html">归档</a>
+    <a href="about.html">关于</a>
+    <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+  <div class="status"><i></i>SYSTEM ONLINE</div>
+</header>
 
+<main>
 
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-categories">
-
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-tags">
-
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-about">
-
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
-
-  </li>
-  </ul>
-</nav>
-
-
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content index posts-expand">
-            
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2026/08/01/CAN-FD%E4%BF%A1%E5%8F%B7%E4%BD%8D%E8%A7%A3%E6%9E%90-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="cocojee">
-      <meta itemprop="description" content="CAN FD、仪表系统、座舱电子、UDS诊断、汽车电子研发经验分享">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="汽车电子研发笔记">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/08/01/CAN-FD%E4%BF%A1%E5%8F%B7%E4%BD%8D%E8%A7%A3%E6%9E%90-1/" class="post-title-link" itemprop="url">CAN FD信号位解析</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-08-01 18:00:00 / 修改时间：18:04:15" itemprop="dateCreated datePublished" datetime="2026-08-01T18:00:00+08:00">2026-08-01</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B1%BD%E8%BD%A6%E7%94%B5%E5%AD%90/" itemprop="url" rel="index"><span itemprop="name">汽车电子</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="CAN-FD简介"><a href="#CAN-FD简介" class="headerlink" title="CAN FD简介"></a>CAN FD简介</h1><p>CAN FD（CAN with Flexible Data-Rate）是传统CAN协议的增强版本。</p>
-<p>相比传统CAN，CAN FD主要提升了数据传输能力。</p>
-<h2 id="1-CAN与CAN-FD区别"><a href="#1-CAN与CAN-FD区别" class="headerlink" title="1. CAN与CAN FD区别"></a>1. CAN与CAN FD区别</h2><p>传统CAN：</p>
-<ul>
-<li>数据长度最大8字节</li>
-<li>传输速率固定</li>
-</ul>
-<p>CAN FD：</p>
-<ul>
-<li>最大支持64字节Payload</li>
-<li>支持仲裁阶段和数据阶段不同速率</li>
-</ul>
-<h2 id="2-CAN-FD信号定义"><a href="#2-CAN-FD信号定义" class="headerlink" title="2. CAN FD信号定义"></a>2. CAN FD信号定义</h2><p>CAN FD报文由以下部分组成：</p>
-<ul>
-<li>ID</li>
-<li>DLC</li>
-<li>Data</li>
-<li>CRC</li>
-</ul>
-<h2 id="3-Motorola信号排列"><a href="#3-Motorola信号排列" class="headerlink" title="3. Motorola信号排列"></a>3. Motorola信号排列</h2><p>在汽车电子开发中，经常使用Motorola格式定义信号。</p>
-<p>特点：</p>
-<ul>
-<li>高位在前</li>
-<li>按字节递减方向排列</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文记录CAN FD信号定义及位排列规则。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
-  
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-kicker">座舱仪表 DRE / SO / FO // BUILD <span data-year>2026</span></div>
+      <h1><span class="glitch" data-text="cocojee">cocojee</span></h1>
+      <p class="hero-type">&gt; <span id="typed"
+        data-lines='["座舱仪表 · 组合仪表 · 影音娱乐","CAN / CAN FD 通信联调","DRE · SO · FO 全流程交付","需求冻结 → SOP → 量产闭环"]'></span><span class="caret"></span></p>
+      <p class="hero-p">
+        组合仪表全生命周期：从 <em>PRD / SRD 定义</em>、供应商协同，到整车集成、SOP 与量产问题闭环。
+      </p>
+      <div class="cta-row">
+        <a class="btn" href="#posts"><span>进入日志 →</span></a>
+        <a class="btn btn--ghost" href="about.html"><span>关于我</span></a>
       </div>
-      <!--/noindex-->
+      <div class="stats">
+        <div class="stat"><b>05<i>YRS</i></b><span>座舱电子经验</span></div>
+        <div class="stat"><b>03<i>DOM</i></b><span>产品方向</span></div>
+        <div class="stat"><b>08<i>CAP</i></b><span>核心能力</span></div>
+      </div>
+    </div>
 
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="cocojee"
-      src="/images/avatar.png">
-  <p class="site-author-name" itemprop="name">cocojee</p>
-  <div class="site-description" itemprop="description">CAN FD、仪表系统、座舱电子、UDS诊断、汽车电子研发经验分享</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">1</span>
-          <span class="site-state-item-name">日志</span>
+    <div class="hero-right">
+      <div class="scope-panel">
+        <div class="scope-head">
+          <span class="l">CAN_H <i>●</i> LIVE</span>
+          <span>500 kbit/s</span>
+        </div>
+        <canvas id="scope" aria-label="CAN 总线波形示意"></canvas>
+        <div class="scope-foot">
+          <span>ID <b>0x18FEF1 00</b></span>
+          <span>DLC <b>0F</b></span>
+          <span>CRC <b>OK</b></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TICKER ============ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>CANoe</span><span>PCAN</span><span>ZCANPRO</span><span>PRD / SRD</span><span>报警策略</span><span>背光调光</span><span>平台化基线</span><span>BOM 变更</span><span>样件认可</span><span>Catia</span><span>Blender</span><span>Premiere / PS / AU</span>
+      <span>CANoe</span><span>PCAN</span><span>ZCANPRO</span><span>PRD / SRD</span><span>报警策略</span><span>背光调光</span><span>平台化基线</span><span>BOM 变更</span><span>样件认可</span><span>Catia</span><span>Blender</span><span>Premiere / PS / AU</span>
+    </div>
+  </div>
+
+  <!-- ============ CAPABILITIES ============ -->
+  <section class="sec" id="capabilities">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="sec-tag">[ 01 / 能力矩阵 CAPABILITY ]</span>
+        <h2 class="sec-title">我<span class="hl">在做</span>什么</h2>
+        <p class="sec-sub">// 组合仪表全生命周期 · 八条主线</p>
+      </div>
+
+      <div class="cap-grid">
+        <article class="cap reveal">
+          <span class="n">01</span>
+          <h3>项目交付</h3>
+          <p>独立负责组合仪表全生命周期开发，推动多个车型完成需求冻结、方案评审、样件验证、整车集成与 SOP 量产，并持续推进量产问题闭环与版本优化。</p>
+          <div class="tools"><span>全生命周期</span><span>SOP</span><span>问题闭环</span></div>
+        </article>
+
+        <article class="cap reveal">
+          <span class="n">02</span>
+          <h3>需求定义</h3>
+          <p>主导 PRD / SRD 编制与评审，完成显示信息、报警策略、指示灯、背光、声音提示及通信接口的功能定义与变更管理。</p>
+          <div class="tools"><span>PRD / SRD</span><span>变更管理</span></div>
+        </article>
+
+        <article class="cap reveal">
+          <span class="n">03</span>
+          <h3>系统匹配</h3>
+          <p>负责仪表与整车控制器的接口匹配，使用 CANoe、PCAN、ZCANPRO 开展 CAN 信号确认、报文分析、功能联调及通信异常定位。</p>
+          <div class="tools"><span>CANoe</span><span>PCAN</span><span>ZCANPRO</span></div>
+        </article>
+
+        <article class="cap reveal">
+          <span class="n">04</span>
+          <h3>供应商管理</h3>
+          <p>统筹供应商软硬件开发、版本状态、样件、图纸 / BOM 及问题清单，组织技术评审、样件认可与工程变更，保障技术状态一致与项目节点交付。</p>
+          <div class="tools"><span>BOM</span><span>样件认可</span><span>工程变更</span></div>
+        </article>
+
+        <article class="cap reveal">
+          <span class="n">05</span>
+          <h3>测试验证</h3>
+          <p>独立制定并执行仪表功能测试，覆盖显示交互、报警逻辑、信号异常、掉电恢复、背光及声音提示等场景，完成问题复现、整改跟踪与回归验证。</p>
+          <div class="tools"><span>功能测试</span><span>回归验证</span></div>
+        </article>
+
+        <article class="cap reveal">
+          <span class="n">06</span>
+          <h3>平台化开发</h3>
+          <p>建立共性功能基线、车型差异清单及参数配置机制，实现同一仪表产品跨车型复用，减少重复需求、软件开发及测试工作量。</p>
+          <div class="tools"><span>功能基线</span><span>参数配置</span></div>
+        </article>
+
+        <article class="cap reveal">
+          <span class="n">07</span>
+          <h3>流程建设</h3>
+          <p>主导编制并推动实施《显示系统交互需求管理办法》，统一需求提出、评审、变更、验证及问题关闭流程。</p>
+          <div class="tools"><span>流程规范</span><span>跨部门协同</span></div>
+        </article>
+
+        <article class="cap reveal">
+          <span class="n">08</span>
+          <h3>影音娱乐系统</h3>
+          <p>娱乐主机、收音机、扬声器、中控一体机、蓝牙音箱、麦克风、充电模块及天线等产品的开发与维护，参与需求确认、供应商对接、样件验证与整车联调。</p>
+          <div class="tools"><span>整车联调</span><span>VAVE</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ POSTS ============ -->
+  <section class="sec" id="posts" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="sec-tag">[ 02 / 日志 INDEX ]</span>
+        <h2 class="sec-title">最新<span class="hl">日志</span></h2>
+        <p class="sec-sub">// 按时间倒序 · 技术细节与踩坑复盘</p>
+      </div>
+
+      <div class="post-list">
+        <a class="post reveal" href="posts/architecture-role-boundary.html">
+          <div class="post-idx"><i>[</i>01<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-11-07</span><span>·</span><span>8 MIN</span>
+              <span class="tag">电子电气架构</span><span class="tag">角色边界</span>
+            </div>
+            <h3 class="post-title">电子电气架构里的职能边界</h3>
+            <p class="post-desc">架构师、SO、FO、DRE、测试、集成到底谁说了算：八个角色的一句话职责、一张 RACI 表，以及三个最常见越界。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/instrument-test-design.html">
+          <div class="post-idx"><i>[</i>02<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-11-05</span><span>·</span><span>8 MIN</span>
+              <span class="tag">测试验证</span><span class="tag">CAPL</span>
+            </div>
+            <h3 class="post-title">仪表功能测试的设计方法</h3>
+            <p class="post-desc">从等价类到掉电恢复：四个维度、六类必测场景、NVM 写入窗口，以及自动化里最容易被忽略的用例污染问题。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/platform-architecture.html">
+          <div class="post-idx"><i>[</i>03<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-11-02</span><span>·</span><span>9 MIN</span>
+              <span class="tag">电子电气架构</span><span class="tag">平台化</span>
+            </div>
+            <h3 class="post-title">平台架构怎么制定：从平台边界到变体矩阵</h3>
+            <p class="post-desc">平台不是最大公约数。五步法划定边界、设计三层变体机制，并用四个可量化指标判断复用是否真的成立。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/warning-arbitration.html">
+          <div class="post-idx"><i>[</i>04<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-10-21</span><span>·</span><span>8 MIN</span>
+              <span class="tag">功能策略</span><span class="tag">HMI</span>
+            </div>
+            <h3 class="post-title">报警策略与优先级仲裁</h3>
+            <p class="post-desc">报警不是布尔量。对象模型、优先级来源、四条仲裁规则、去抖与迟滞，以及「抑制」和「清除」不能写成同一个动作。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/eea-evolution.html">
+          <div class="post-idx"><i>[</i>05<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-10-15</span><span>·</span><span>8 MIN</span>
+              <span class="tag">电子电气架构</span><span class="tag">中央计算</span>
+            </div>
+            <h3 class="post-title">电子电气架构的三次演进：分布式、域集中、中央计算</h3>
+            <p class="post-desc">每一代架构解决了什么、又付出了什么代价；域集中按功能合并，区域集中按位置合并，两者并不等价。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/cluster-architecture-4-views.html">
+          <div class="post-idx"><i>[</i>06<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-10-03</span><span>·</span><span>8 MIN</span>
+              <span class="tag">系统架构</span><span class="tag">SO</span>
+            </div>
+            <h3 class="post-title">仪表系统架构的四个视图</h3>
+            <p class="post-desc">信号、状态、电源、诊断——四个正交视图拆解仪表系统，最后收敛成一条可实测的上电时序。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/function-allocation.html">
+          <div class="post-idx"><i>[</i>07<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-09-26</span><span>·</span><span>7 MIN</span>
+              <span class="tag">电子电气架构</span><span class="tag">接口设计</span>
+            </div>
+            <h3 class="post-title">功能分配与接口设计</h3>
+            <p class="post-desc">功能怎么分配到节点、接口用什么形式表达、时序与超时如何定，以及变更影响分析的三个必答问题。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/instrument-dre-boundary.html">
+          <div class="post-idx"><i>[</i>08<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-09-12</span><span>·</span><span>7 MIN</span>
+              <span class="tag">流程与角色</span><span class="tag">DRE</span>
+            </div>
+            <h3 class="post-title">组合仪表 DRE 的责任边界</h3>
+            <p class="post-desc">从需求冻结到 SOP：四个交付节点、交付物清单、与 FO/SO 的分工，以及五个最容易出事的高危接口。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
+        </a>
+        <a class="post reveal" href="posts/can-fd-signal-parsing.html">
+          <div class="post-idx"><i>[</i>09<i>]</i></div>
+          <div class="post-body">
+            <div class="post-meta">
+              <span>2026-08-01</span><span>·</span><span>6 MIN</span>
+              <span class="tag">CAN FD</span><span class="tag">通信联调</span>
+            </div>
+            <h3 class="post-title">CAN FD 信号位解析</h3>
+            <p class="post-desc">从 DLC 非线性映射到 Motorola 字节序，完整拆解 CAN FD 报文解析链路与 start bit 计算易错点。</p>
+          </div>
+          <div class="post-arrow" aria-hidden="true">↗</div>
         </a>
       </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-          
-        <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-          
-        <span class="site-state-item-count">2</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
 
 
 
-      </div>
-
+      <a class="sec-more" href="archives.html">查看全部日志 <span aria-hidden="true">→</span></a>
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
+  </section>
 
-
+  <!-- ============ ARCADE ============ -->
+  <section class="sec" id="arcade" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="sec-tag">[ 03 / 实验室 ARCADE ]</span>
+        <h2 class="sec-title">玩<span class="hl">一下</span></h2>
+        <p class="sec-sub">// 两个小游戏 · 纯前端 · 不联网 · 不上分</p>
       </div>
-    </main>
 
-    <footer class="footer">
-      <div class="footer-inner">
-        
+      <div class="arcade-grid">
+        <div class="game-card reveal">
+          <div class="game-head"><span class="g-name">TELLTALE REFLEX</span><span class="g-sub">指示灯反应挑战</span></div>
+          <div class="reflex-grid" id="reflexGrid"></div>
+          <p class="g-result" id="reflexResult"></p>
+          <div class="game-foot">
+            <span class="g-score">最佳 <b id="reflexBest">—</b> ms · 第 <b id="reflexRound">0</b>/10</span>
+            <button type="button" class="chip" id="reflexStart">开始</button>
+          </div>
+        </div>
 
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">cocojee</span>
-</div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
-  </div>
-
-        
-
-
-
-
-
-
-
-
+        <div class="game-card reveal">
+          <div class="game-head"><span class="g-name">NEON SNAKE</span><span class="g-sub">霓虹贪吃蛇</span></div>
+          <canvas id="snake" width="360" height="360" tabindex="0" aria-label="贪吃蛇游戏区"></canvas>
+          <div class="game-foot">
+            <span class="g-score">得分 <b id="snakeScore">0</b> · 最高 <b id="snakeBest">0</b></span>
+            <span class="dpad">
+              <button type="button" data-dir="left" aria-label="左">←</button>
+              <button type="button" data-dir="up" aria-label="上">↑</button>
+              <button type="button" data-dir="down" aria-label="下">↓</button>
+              <button type="button" data-dir="right" aria-label="右">→</button>
+            </span>
+            <button type="button" class="chip" id="snakeStart">开始</button>
+          </div>
+        </div>
       </div>
-    </footer>
+    </div>
+  </section>
+  <!-- ============ TIMELINE ============ -->
+  <section class="sec" id="timeline" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="sec-tag">[ 04 / 历程 TRACK ]</span>
+        <h2 class="sec-title">成长<span class="hl">路径</span></h2>
+        <p class="sec-sub">// 成长历程</p>
+      </div>
+
+      <ol class="tl">
+        <li class="tl-item reveal">
+          <div class="tl-time">2024.12 — 至今</div>
+          <h3 class="tl-role">工程师 → 主管工程师</h3>
+          <p class="tl-desc">主导仪表升级及商改项目、新平台项目组合仪表开发；负责共性功能基线与跨车型参数化配置，推动平台化产品落地。</p>
+        </li>
+        <li class="tl-item reveal">
+          <div class="tl-time">2023.05 — 2024.12</div>
+          <h3 class="tl-role">助理工程师 → 工程师</h3>
+          <p class="tl-desc">完成首个跨车型复用的平台化仪表产品；并行推进多个车型的组合仪表开发、出口车型适配与影音娱乐系统维护。</p>
+        </li>
+        <li class="tl-item reveal">
+          <div class="tl-time">2021.12 — 2023.05</div>
+          <h3 class="tl-role">见习生 → 助理工程师</h3>
+          <p class="tl-desc">负责批量车型影音娱乐系统维护（中控一体机、蓝牙音箱、扬声器、麦克风、充电模块、天线）及 VAVE 工作。</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-word">COCOJEE</div>
+  <div class="foot-grid">
+    <div class="foot-links">
+      <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="archives.html">归档</a>
+      <a href="about.html">关于</a>
+    </div>
+    <div class="foot-meta">
+      © <span data-year>2026</span> <b>cocojee</b> · cocojee blog<br>
+      POWERED BY <b>GITHUB PAGES</b> · ZERO BUILD
+    </div>
   </div>
+</footer>
 
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<a class="totop" href="#" aria-label="回到顶部">↑</a>
 
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
+<script src="assets/js/app.js"></script>
+<script src="assets/js/scope.js"></script>
+  <script src="assets/js/fx.js"></script>
+  <script src="assets/js/arcade.js"></script>
 </body>
 </html>

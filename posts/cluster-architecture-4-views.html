@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#05050a">
+<title>仪表系统架构的四个视图 · cocojee blog</title>
+<meta name="description" content="从系统负责人视角拆解仪表：信号视图、状态视图、电源视图、诊断视图，以及它们如何串成一条上电时序。">
+<meta name="author" content="cocojee">
+<meta property="og:type" content="article">
+<meta property="og:title" content="仪表系统架构的四个视图">
+<meta property="og:description" content="信号、状态、电源、诊断——系统负责人必须先画清楚的四张图。">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+
+<div class="progress"><i></i></div>
+
+<div class="bg" aria-hidden="true">
+  <div class="bg-glow"></div>
+  <div class="grid-floor"></div>
+  <div class="scanlines"></div>
+  <div class="sweep"></div>
+  <div class="noise"></div>
+  <div class="vignette"></div>
+</div>
+
+<div class="cursor" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="../index.html">cocojee<b>//</b>blog<span class="cursorblk"></span></a>
+  <nav class="nav-links" aria-label="主导航">
+    <a href="../index.html">首页</a>
+    <a href="../archives.html">归档</a>
+    <a href="../about.html">关于</a>
+    <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+  <div class="status"><i></i>SYSTEM ONLINE</div>
+</header>
+
+<main>
+
+  <section class="sec" style="padding-top:calc(66px + clamp(48px,7vw,80px))">
+    <div class="wrap">
+      <div class="article-grid">
+
+        <aside class="toc reveal">
+          <span class="toc-label">目录 / INDEX</span>
+          <a href="#why" class="active">为什么是四个视图</a>
+          <a href="#signal">一、信号视图</a>
+          <a href="#state">二、状态视图</a>
+          <a href="#power">三、电源视图</a>
+          <a href="#diag">四、诊断视图</a>
+          <a href="#timeline">串成一条上电时序</a>
+        </aside>
+
+        <article class="prose reveal" style="--d:.08s">
+          <div class="crumb">
+            <span><a href="../index.html">首页</a></span><span>/</span>
+            <span><a href="../archives.html">汽车电子</a></span><span>/</span>
+            <b>仪表系统架构的四个视图</b>
+          </div>
+          <h1 class="article-title">仪表系统架构的四个视图</h1>
+          <div class="article-meta">2026-10-03 · 8 MIN READ · 汽车电子 · 系统架构</div>
+
+          <h2 id="why">为什么是四个视图</h2>
+          <p>
+            仪表系统最怕的不是功能多，而是<strong>说不清边界</strong>。
+            用一份需求文档描述仪表，很快会变成几百条互相引用的条目；
+            而用四个正交视图去切，任何一条需求都能落到某一张图的某个位置上。
+          </p>
+          <ul>
+            <li><strong>信号视图</strong>：数据从哪来、多久来一次、不来怎么办</li>
+            <li><strong>状态视图</strong>：系统当前处于什么状态、什么条件下迁移</li>
+            <li><strong>电源视图</strong>：电从哪来、什么时候断、断了要保住什么</li>
+            <li><strong>诊断视图</strong>：出了问题怎么被记录、被读取、被定位</li>
+          </ul>
+
+          <h2 id="signal">一、信号视图</h2>
+          <p>
+            信号视图的核心不是「有哪些信号」，而是<strong>每个信号的四元组</strong>：
+            来源、周期、失效值、超时判定。缺任何一个，联调时都会变成口头约定。
+          </p>
+          <div class="code">
+            <div class="code-bar"><i></i><i></i><i></i><span>signal_desc.h</span></div>
+<pre><code><span class="k">typedef struct</span> {
+    <span class="t">uint32_t</span> msg_id;        <span class="c">/* CAN ID（含扩展帧标志） */</span>
+    <span class="t">uint16_t</span> period_ms;     <span class="c">/* 标称周期 */</span>
+    <span class="t">uint8_t</span>  timeout_cnt;    <span class="c">/* 连续丢失多少帧判超时 */</span>
+    <span class="t">uint8_t</span>  use_e2e;         <span class="c">/* 是否带 CRC + 计数 */</span>
+    <span class="t">int32_t</span>  fail_value;      <span class="c">/* 超时后的替代值 */</span>
+    <span class="k">enum</span> { SRC_CAN, SRC_LIN, SRC_HARDWIRE } src;
+} <span class="t">signal_desc_t</span>;</code></pre>
+          </div>
+          <p>
+            <strong>超时判定</strong>建议取 3 个周期而不是 1 个：单帧丢失在整车上是常态，
+            用 1 个周期判超时会让指针频繁停顿。反过来，<strong>失效值必须和「0」区分开</strong>——
+            车速超时后置 0 和真的停车，界面上看起来一模一样，这是最危险的一类设计。
+          </p>
+          <blockquote>
+            <b>经验</b>：凡是「超时后置 0」的信号，都要在 HMI 上有独立的降级表现（占位符、置灰、报警），
+            否则用户无法区分「没有数据」和「数据是 0」。
+          </blockquote>
+
+          <h2 id="state">二、状态视图</h2>
+          <p>仪表本体通常只需要四个状态，多一个都是在给自己找麻烦：</p>
+          <ol>
+            <li><strong>Init</strong>：上电自检、外设初始化、首帧发送</li>
+            <li><strong>Normal</strong>：全功能可用</li>
+            <li><strong>Degraded</strong>：某路信号或某个外设失效，功能降级但主体可用</li>
+            <li><strong>Fault</strong>：关键资源失效（如显示驱动），进入安全提示</li>
+          </ol>
+          <p>
+            状态迁移必须<strong>单向可追溯</strong>：Normal → Degraded → Fault 允许，
+            Fault 自动回 Normal 不允许，必须经过一次完整下电重启。
+            否则会出现「故障闪一下就自愈」的假象，掩盖真实问题。
+          </p>
+
+          <h2 id="power">三、电源视图</h2>
+          <p>仪表的电从来不是「有电」和「没电」两态，而是至少五态：</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>电源模式</th><th>显示</th><th>通信</th><th>诊断</th><th>典型行为</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>OFF（KL30 仅常电）</td><td>灭</td><td>休眠</td><td>不可用</td><td>暗电流 ≤ 整车预算</td></tr>
+                <tr><td>ACC</td><td>可点亮</td><td>唤醒</td><td>可用</td><td>收音机等附件功能</td></tr>
+                <tr><td>ON</td><td>全亮</td><td>全功能</td><td>可用</td><td>常规行驶</td></tr>
+                <tr><td>CRANK</td><td>保持</td><td>保持</td><td>可用</td><td>启动瞬间电压跌落</td></tr>
+                <tr><td>RUN</td><td>全亮</td><td>全功能</td><td>可用</td><td>发动机/电机运行</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            两个数字必须提前定死：<strong>欠压工作下限</strong>与<strong>掉电保持窗口</strong>。
+            前者决定 CRANK 时仪表黑不黑屏，后者决定 NVM 能不能写完。
+            常见做法是 9V 以下停止刷新但保持显示，16V 以上进入过压保护并记 DTC。
+          </p>
+
+          <h2 id="diag">四、诊断视图</h2>
+          <p>UDS 服务不需要全支持，但下面这几个没有，售后就会很痛苦：</p>
+          <ul>
+            <li><code>0x10</code> 会话控制、<code>0x27</code> 安全访问（写配置/刷写前置）</li>
+            <li><code>0x22</code> 读数据（版本号、序列号、当前报警状态）</li>
+            <li><code>0x19</code> 读 DTC、<code>0x14</code> 清 DTC</li>
+            <li><code>0x2E</code> 写配置（里程标定、配置字）</li>
+          </ul>
+          <p>
+            DTC 记录的关键是<strong>状态字节</strong>：testFailed、confirmed、testNotCompletedSinceLastClear、
+            warningIndicatorRequested 这几位组合起来，才能区分「偶发未确认」和「已确认待修」。
+            只记一个「有没有故障」的 DTC，等于没记。
+          </p>
+
+          <h2 id="timeline">串成一条上电时序</h2>
+          <p>四个视图最后会收敛到一条时间线上，这也是台架联调最先对的东西：</p>
+          <ol>
+            <li><code>0 ms</code> KL15 上电，电源管理启动</li>
+            <li><code>≈ 120 ms</code> MCU 与外设初始化完成</li>
+            <li><code>≤ 300 ms</code> 首帧 CAN 发出（这是整车网络管理的硬约束）</li>
+            <li><code>≈ 600 ms</code> 显示点亮，指针自检扫表</li>
+            <li><code>3 s</code> 自检结束，进入 Normal</li>
+          </ol>
+          <p>
+            任何一步超时都会在实车上表现为「仪表启动慢」，
+            而排查时最有说服力的证据不是现象描述，而是<strong>这条时间线上的实测时间戳</strong>。
+          </p>
+
+          <div class="article-foot">
+            <div class="tagrow"><span>系统架构</span><span>汽车电子</span><span>SO</span></div>
+            <a class="sec-more" href="../archives.html">返回归档 <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-word">COCOJEE</div>
+  <div class="foot-grid">
+    <div class="foot-links">
+      <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../archives.html">归档</a>
+      <a href="../about.html">关于</a>
+    </div>
+    <div class="foot-meta">
+      © <span data-year>2026</span> <b>cocojee</b> · cocojee blog<br>
+      POWERED BY <b>GITHUB PAGES</b> · ZERO BUILD
+    </div>
+  </div>
+</footer>
+
+<a class="totop" href="#" aria-label="回到顶部">↑</a>
+
+<script src="../assets/js/app.js"></script>
+  <script src="../assets/js/fx.js"></script>
+</body>
+</html>

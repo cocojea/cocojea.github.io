@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#05050a">
+<title>平台架构怎么制定：从平台边界到变体矩阵 · cocojee blog</title>
+<meta name="description" content="平台不是最大公约数：划定边界、功能分级、功能分配、通信骨架、变体机制五步法，以及复用度怎么量化。">
+<meta name="author" content="cocojee">
+<meta property="og:type" content="article">
+<meta property="og:title" content="平台架构怎么制定：从平台边界到变体矩阵">
+<meta property="og:description" content="五步法定义平台架构，并用可量化指标衡量复用度。">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/css/site.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+
+<div class="progress"><i></i></div>
+
+<div class="bg" aria-hidden="true">
+  <div class="bg-glow"></div>
+  <div class="grid-floor"></div>
+  <div class="scanlines"></div>
+  <div class="sweep"></div>
+  <div class="noise"></div>
+  <div class="vignette"></div>
+</div>
+
+<div class="cursor" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="../index.html">cocojee<b>//</b>blog<span class="cursorblk"></span></a>
+  <nav class="nav-links" aria-label="主导航">
+    <a href="../index.html">首页</a>
+    <a href="../archives.html">归档</a>
+    <a href="../about.html">关于</a>
+    <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+  <div class="status"><i></i>SYSTEM ONLINE</div>
+</header>
+
+<main>
+
+  <section class="sec" style="padding-top:calc(66px + clamp(48px,7vw,80px))">
+    <div class="wrap">
+      <div class="article-grid">
+
+        <aside class="toc reveal">
+          <span class="toc-label">目录 / INDEX</span>
+          <a href="#what" class="active">平台到底是什么</a>
+          <a href="#five">制定的五个步骤</a>
+          <a href="#variant">变体机制怎么设计</a>
+          <a href="#metric">复用度怎么量化</a>
+          <a href="#fail">三种典型失败</a>
+          <a href="#govern">平台治理</a>
+        </aside>
+
+        <article class="prose reveal" style="--d:.08s">
+          <div class="crumb">
+            <span><a href="../index.html">首页</a></span><span>/</span>
+            <span><a href="../archives.html">汽车电子</a></span><span>/</span>
+            <b>平台架构怎么制定</b>
+          </div>
+          <h1 class="article-title">平台架构怎么制定：从平台边界到变体矩阵</h1>
+          <div class="article-meta">2026-11-02 · 9 MIN READ · 电子电气架构 · 平台化</div>
+
+          <h2 id="what">平台到底是什么</h2>
+          <p>
+            平台不是「一套所有车都能用的方案」，而是<strong>一组可复用的技术基线，加上一套受控的变体机制</strong>。
+            两个要素缺一不可：只有基线没有变体，做完就是最大公约数；只有变体没有基线，等于每个项目各做各的。
+          </p>
+          <p>
+            判断一个平台是否成立，只看一件事：<strong>新增一个车型时，需要改动的差异点是否被清晰枚举、且数量可控</strong>。
+            如果每次新车型都要「现场再说」，那不是平台，是复用了一次的项目。
+          </p>
+
+          <h2 id="five">制定的五个步骤</h2>
+          <ol>
+            <li>
+              <strong>划定平台边界</strong>：覆盖哪些车型级别、哪些动力形式、生命周期几年。
+              边界写不清楚，后面所有决策都会失焦。
+            </li>
+            <li>
+              <strong>功能清单与分级</strong>：把功能拆成「全系必备 / 选装 / 区域特有」三级。
+              分级决定了哪些进基线、哪些进变体。
+            </li>
+            <li>
+              <strong>功能分配到节点</strong>：谁算、谁显示、谁存储。分配原则见后文，本质是就近、实时、隔离与成本的折中。
+            </li>
+            <li>
+              <strong>通信骨架</strong>：几段 CAN、是否上以太网骨干、网关放在哪、跨段路由规则。
+              骨架一旦定了，后面所有节点的接口都得服从它。
+            </li>
+            <li>
+              <strong>变体机制</strong>：硬件变体、软件变体、配置字三层，各自负责不同粒度的差异。
+            </li>
+          </ol>
+          <blockquote>
+            <b>顺序不能换</b>：先定变体机制再定通信骨架，会导致每加一个变体就多一段网络；
+            先定功能分配再定功能清单，会导致功能被节点能力反向裁剪。
+          </blockquote>
+
+          <h2 id="variant">变体机制怎么设计</h2>
+          <p>差异分三层管理，越往下改动成本越低、风险越小：</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>层级</th><th>承载什么差异</th><th>改动代价</th><th>典型手段</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>硬件变体</td><td>接口数量、屏幕尺寸、功率等级</td><td>高</td><td>不同料号、可选贴装</td></tr>
+                <tr><td>软件变体</td><td>功能有无、策略差异、区域法规</td><td>中</td><td>编译开关、功能包</td></tr>
+                <tr><td>配置字</td><td>参数、阈值、标定、使能位</td><td>低</td><td>EOL 写入、诊断写入</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            设计的核心目标是<strong>把差异尽量往下层压</strong>：能用一个配置位解决的，绝不新开一个硬件料号；
+            能用功能包切换的，绝不编译两套软件。
+          </p>
+          <div class="code">
+            <div class="code-bar"><i></i><i></i><i></i><span>variant_config.h</span></div>
+<pre><code><span class="k">typedef struct</span> {
+    <span class="t">uint8_t</span>  platform;      <span class="c">/* 平台代号，决定基线版本 */</span>
+    <span class="t">uint8_t</span>  screen_type;   <span class="c">/* 7" / 10.25" / 12.3" */</span>
+    <span class="t">uint8_t</span>  region;        <span class="c">/* 法规区域，影响图标与语言 */</span>
+    <span class="t">uint16_t</span> feature_bits;  <span class="c">/* 位域：哪 16 个可选功能被使能 */</span>
+    <span class="t">uint32_t</span> checksum;      <span class="c">/* 配置完整性校验 */</span>
+} <span class="t">variant_cfg_t</span>;</code></pre>
+          </div>
+          <p>
+            配置字必须有校验，且<strong>损坏时能回落到一个安全的默认配置</strong>。
+            配置字丢失导致功能全开的案例，在量产车上并不罕见。
+          </p>
+
+          <h2 id="metric">复用度怎么量化</h2>
+          <p>「我们复用得很好」是没法评审的。至少要有四个可量化指标：</p>
+          <ul>
+            <li><strong>功能复用率</strong>：平台功能数 / 车型功能总数</li>
+            <li><strong>差异点数</strong>：每个新车型相对基线的变更条目数，应呈收敛趋势</li>
+            <li><strong>配置项数量</strong>：配置字位宽增长曲线，失控前必须收敛</li>
+            <li><strong>变体组合数</strong>：理论组合数 vs 实际出货组合数，差距越大说明设计冗余越多</li>
+          </ul>
+          <p>
+            其中<strong>差异点数</strong>最有说服力：第一个车型 200 条、第二个 120 条、第三个 60 条，
+            这是健康曲线；如果一直在 180 条上下，说明平台没有真正沉淀。
+          </p>
+
+          <h2 id="fail">三种典型失败</h2>
+          <ol>
+            <li>
+              <strong>最大公约数陷阱</strong>：为了兼容所有车型，把功能做到最低配，
+              结果每个项目上线后都要加回自己的需求，平台变成了负担。
+            </li>
+            <li>
+              <strong>if-else 硬化</strong>：差异用代码里的条件分支实现，而不是配置。
+              车型一多，代码复杂度指数上升，谁也不敢改。
+            </li>
+            <li>
+              <strong>配置字爆炸</strong>：每个新需求都加一个配置位，最终几十个位互相耦合，
+              没有任何人能说清某个组合是否合法。
+            </li>
+          </ol>
+          <blockquote>
+            <b>解法</b>：配置字要有「合法组合表」，非法组合在 EOL 阶段就被拒绝写入，
+            而不是等到整车下线后才发现某个功能永远打不开。
+          </blockquote>
+
+          <h2 id="govern">平台治理</h2>
+          <p>平台最难的不是设计出来，而是<strong>守住它</strong>。三条规则比较有效：</p>
+          <ul>
+            <li><strong>准入</strong>：新需求进入平台基线前，必须证明「无法用现有变体机制满足」</li>
+            <li><strong>基线冻结</strong>：每个年型一条基线，冻结后只接受缺陷修复，功能变更走下一个基线</li>
+            <li><strong>反向验证</strong>：每季度用最近三个车型的差异点反推平台设计缺陷，形成改进项</li>
+          </ul>
+          <p>
+            平台的价值不在第一年体现，而在第三年——当新车型的开发周期和缺陷率明显低于第一个车型时，
+            平台才算真的成立。
+          </p>
+
+          <div class="article-foot">
+            <div class="tagrow"><span>电子电气架构</span><span>平台化</span><span>变体管理</span></div>
+            <a class="sec-more" href="../archives.html">返回归档 <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-word">COCOJEE</div>
+  <div class="foot-grid">
+    <div class="foot-links">
+      <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="../archives.html">归档</a>
+      <a href="../about.html">关于</a>
+    </div>
+    <div class="foot-meta">
+      © <span data-year>2026</span> <b>cocojee</b> · cocojee blog<br>
+      POWERED BY <b>GITHUB PAGES</b> · ZERO BUILD
+    </div>
+  </div>
+</footer>
+
+<a class="totop" href="#" aria-label="回到顶部">↑</a>
+
+<script src="../assets/js/app.js"></script>
+  <script src="../assets/js/fx.js"></script>
+</body>
+</html>
