@@ -168,10 +168,8 @@
       </div>
 
       <div class="post-list">
-
-
-
-      </div>
+        <a class="post reveal" href="posts/architecture-role-boundary.html">
+          <div class="post-idx"><i>[</i>01<i>]</i></div>
           <div class="post-body">
             <div class="post-meta">
               <span>2026-11-07</span><span>·</span><span>8 MIN</span>
@@ -205,80 +203,7 @@
             <p class="post-desc">平台不是最大公约数。五步法划定边界、设计三层变体机制，并用四个可量化指标判断复用是否真的成立。</p>
           </div>
           <div class="post-arrow" aria-hidden="true">↗</div>
-        </a>
-        <a class="post reveal" href="posts/warning-arbitration.html">
-          <div class="post-idx"><i>[</i>04<i>]</i></div>
-          <div class="post-body">
-            <div class="post-meta">
-              <span>2026-10-21</span><span>·</span><span>8 MIN</span>
-              <span class="tag">功能策略</span><span class="tag">HMI</span>
-            </div>
-            <h3 class="post-title">报警策略与优先级仲裁</h3>
-            <p class="post-desc">报警不是布尔量。对象模型、优先级来源、四条仲裁规则、去抖与迟滞，以及「抑制」和「清除」不能写成同一个动作。</p>
-          </div>
-          <div class="post-arrow" aria-hidden="true">↗</div>
-        </a>
-        <a class="post reveal" href="posts/eea-evolution.html">
-          <div class="post-idx"><i>[</i>05<i>]</i></div>
-          <div class="post-body">
-            <div class="post-meta">
-              <span>2026-10-15</span><span>·</span><span>8 MIN</span>
-              <span class="tag">电子电气架构</span><span class="tag">中央计算</span>
-            </div>
-            <h3 class="post-title">电子电气架构的三次演进：分布式、域集中、中央计算</h3>
-            <p class="post-desc">每一代架构解决了什么、又付出了什么代价；域集中按功能合并，区域集中按位置合并，两者并不等价。</p>
-          </div>
-          <div class="post-arrow" aria-hidden="true">↗</div>
-        </a>
-        <a class="post reveal" href="posts/cluster-architecture-4-views.html">
-          <div class="post-idx"><i>[</i>06<i>]</i></div>
-          <div class="post-body">
-            <div class="post-meta">
-              <span>2026-10-03</span><span>·</span><span>8 MIN</span>
-              <span class="tag">系统架构</span><span class="tag">SO</span>
-            </div>
-            <h3 class="post-title">仪表系统架构的四个视图</h3>
-            <p class="post-desc">信号、状态、电源、诊断——四个正交视图拆解仪表系统，最后收敛成一条可实测的上电时序。</p>
-          </div>
-          <div class="post-arrow" aria-hidden="true">↗</div>
-        </a>
-        <a class="post reveal" href="posts/function-allocation.html">
-          <div class="post-idx"><i>[</i>07<i>]</i></div>
-          <div class="post-body">
-            <div class="post-meta">
-              <span>2026-09-26</span><span>·</span><span>7 MIN</span>
-              <span class="tag">电子电气架构</span><span class="tag">接口设计</span>
-            </div>
-            <h3 class="post-title">功能分配与接口设计</h3>
-            <p class="post-desc">功能怎么分配到节点、接口用什么形式表达、时序与超时如何定，以及变更影响分析的三个必答问题。</p>
-          </div>
-          <div class="post-arrow" aria-hidden="true">↗</div>
-        </a>
-        <a class="post reveal" href="posts/instrument-dre-boundary.html">
-          <div class="post-idx"><i>[</i>08<i>]</i></div>
-          <div class="post-body">
-            <div class="post-meta">
-              <span>2026-09-12</span><span>·</span><span>7 MIN</span>
-              <span class="tag">流程与角色</span><span class="tag">DRE</span>
-            </div>
-            <h3 class="post-title">组合仪表 DRE 的责任边界</h3>
-            <p class="post-desc">从需求冻结到 SOP：四个交付节点、交付物清单、与 FO/SO 的分工，以及五个最容易出事的高危接口。</p>
-          </div>
-          <div class="post-arrow" aria-hidden="true">↗</div>
-        </a>
-        <a class="post reveal" href="posts/can-fd-signal-parsing.html">
-          <div class="post-idx"><i>[</i>09<i>]</i></div>
-          <div class="post-body">
-            <div class="post-meta">
-              <span>2026-08-01</span><span>·</span><span>6 MIN</span>
-              <span class="tag">CAN FD</span><span class="tag">通信联调</span>
-            </div>
-            <h3 class="post-title">CAN FD 信号位解析</h3>
-            <p class="post-desc">从 DLC 非线性映射到 Motorola 字节序，完整拆解 CAN FD 报文解析链路与 start bit 计算易错点。</p>
-          </div>
-          <div class="post-arrow" aria-hidden="true">↗</div>
-        </a>
-      </div>
+        </a>      </div>
 
 
 
@@ -296,12 +221,16 @@
 
       <div class="arcade-grid">
         <div class="game-card reveal">
-          <div class="game-head"><span class="g-name">TELLTALE REFLEX</span><span class="g-sub">指示灯反应挑战</span></div>
-          <div class="reflex-grid" id="reflexGrid"></div>
-          <p class="g-result" id="reflexResult"></p>
+          <div class="game-head"><span class="g-name">SIGNAL DECODER</span><span class="g-sub">CAN 信号解码挑战</span></div>
+                    <div class="decoder" id="decoder">
+            <div class="dec-head"><span id="decQ">第 1 / 5 题</span><span class="t" id="decTimer">15s</span></div>
+            <div class="dec-frame"><span class="lbl">FRAME</span><code id="decFrame">-- -- -- -- -- -- -- --</code></div>
+            <div class="dec-spec" id="decSpec">根据 DBC 定义，计算该信号的物理值</div>
+            <div class="dec-opts" id="decOpts"></div>
+          </div>
           <div class="game-foot">
-            <span class="g-score">最佳 <b id="reflexBest">—</b> ms · 第 <b id="reflexRound">0</b>/10</span>
-            <button type="button" class="chip" id="reflexStart">开始</button>
+            <span class="g-score">得分 <b id="decScore">0</b> · 最佳 <b id="decBest">0</b></span>
+            <button type="button" class="chip" id="decStart">开始</button>
           </div>
         </div>
 

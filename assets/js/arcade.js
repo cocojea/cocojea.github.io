@@ -1,90 +1,113 @@
-/* arcade.js — 两个小游戏：指示灯反应挑战 + 霓虹贪吃蛇
+/* arcade.js — 小游戏：CAN 信号解码挑战 + 霓虹贪吃蛇
    纯前端、零依赖、可中断（页面隐藏时自动暂停） */
 (function () {
   "use strict";
   var $ = function (s, c) { return (c || document).querySelector(s); };
 
-  /* ============ 1. TELLTALE REFLEX · 指示灯反应 ============ */
-  var grid = $("#reflexGrid");
-  if (grid) {
-    var LABELS = ["制动", "机油", "电池", "ABS", "ESP", "气囊", "胎压", "水温", "转向"];
-    var cells = [];
-    LABELS.forEach(function (l) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "reflex-cell";
-      b.textContent = l;
-      grid.appendChild(b);
-      cells.push(b);
-    });
+  /* ============ 1. SIGNAL DECODER · CAN 信号解码 ============ */
+  var D = $("#decoder");
+  if (D) {
+    var QUESTIONS = [
+      { frame: "00 00 64 00 00 00 00 00", spec: "车速 · 字节2–3 · Intel 16位无符号 · factor 1.5 → km/h", answer: 150, opts: [150, 90, 375, 100] },
+      { frame: "00 6E 00 00 00 00 00 00", spec: "水温 · 字节1 · 8位无符号 · offset -40 → °C", answer: 70, opts: [70, 40, 100, 30] },
+      { frame: "00 00 A0 0F 00 00 00 00", spec: "转速 · 字节2–3 · Intel 16位 · factor 0.25 → rpm", answer: 1000, opts: [1000, 4000, 250, 16000] },
+      { frame: "00 00 00 50 00 00 00 00", spec: "电量 · 字节3 · 8位无符号 · factor 1 → %", answer: 80, opts: [80, 50, 120, 40] },
+      { frame: "00 00 00 00 F4 01 00 00", spec: "里程 · 字节4–5 · Intel 16位 · factor 0.1 → km", answer: 50, opts: [50, 500, 5, 100] }
+    ];
 
-    var bestEl = $("#reflexBest"), roundEl = $("#reflexRound"),
-        startBtn = $("#reflexStart"), resultEl = $("#reflexResult");
+    var startBtn = $("#decStart"), scoreEl = $("#decScore"), bestEl = $("#decBest"),
+        qEl = $("#decQ"), timerEl = $("#decTimer"), frameEl = $("#decFrame"),
+        specEl = $("#decSpec"), optsEl = $("#decOpts");
 
-    var best = parseInt(localStorage.getItem("reflexBest") || "0", 10);
-    if (best > 0 && bestEl) bestEl.textContent = best;
+    var best = parseInt(localStorage.getItem("decBest") || "0", 10);
+    if (bestEl) bestEl.textContent = best;
 
-    var state = "idle", round = 0, activeIdx = -1, t0 = 0, times = [], to = null;
+    var state = "idle", idx = 0, score = 0, timer = null, remain = 0, answering = false;
 
-    function clearCells() { cells.forEach(function (c) { c.className = "reflex-cell"; }); }
+    function shuffle(a) { return a.slice().sort(function () { return Math.random() - 0.5; }); }
+    function grade(s) { return s >= 100 ? "解码大师" : s >= 60 ? "熟练" : s >= 40 ? "入门" : "多练练"; }
 
-    function grade(avg) {
-      if (avg < 260) return "车规级反应";
-      if (avg < 340) return "老司机";
-      if (avg < 450) return "及格";
-      return "再练练";
+    function lock() {
+      answering = false;
+      clearInterval(timer);
+      optsEl.querySelectorAll("button").forEach(function (b) {
+        b.disabled = true; b.classList.add("dim");
+      });
+    }
+
+    function reveal(q) {
+      optsEl.querySelectorAll("button").forEach(function (b) {
+        if (parseInt(b.textContent, 10) === q.answer) b.classList.add("ok");
+      });
     }
 
     function end() {
-      state = "idle";
-      if (roundEl) roundEl.textContent = "0";
-      var avg = Math.round(times.reduce(function (a, b) { return a + b; }, 0) / times.length);
-      if (resultEl) resultEl.textContent = "平均 " + avg + " ms · " + grade(avg);
-      if (best === 0 || avg < best) {
-        best = avg;
-        localStorage.setItem("reflexBest", String(avg));
-        if (bestEl) bestEl.textContent = best;
-      }
+      state = "idle"; clearInterval(timer);
+      if (frameEl) frameEl.textContent = "-- -- -- -- -- -- -- --";
+      if (specEl) specEl.textContent = "完成！得分 " + score + " · " + grade(score);
+      if (optsEl) optsEl.innerHTML = "";
+      if (qEl) qEl.textContent = "完成";
+      if (timerEl) timerEl.textContent = "—";
+      if (score > best) { best = score; localStorage.setItem("decBest", String(best)); if (bestEl) bestEl.textContent = best; }
       if (startBtn) startBtn.textContent = "再玩一次";
     }
 
+    function show() {
+      var q = QUESTIONS[idx];
+      qEl.textContent = "第 " + (idx + 1) + " / " + QUESTIONS.length + " 题";
+      frameEl.textContent = q.frame;
+      specEl.textContent = q.spec;
+      optsEl.innerHTML = "";
+      shuffle(q.opts).forEach(function (v) {
+        var b = document.createElement("button");
+        b.type = "button"; b.textContent = v;
+        b.addEventListener("click", function () { choose(v, b); });
+        optsEl.appendChild(b);
+      });
+      remain = 15;
+      timerEl.textContent = remain + "s";
+      answering = true;
+      timer = setInterval(function () {
+        remain--;
+        timerEl.textContent = remain + "s";
+        if (remain <= 0) { clearInterval(timer); timeout(); }
+      }, 1000);
+    }
+
+    function choose(v, btn) {
+      if (!answering) return;
+      lock();
+      var q = QUESTIONS[idx];
+      if (v === q.answer) {
+        score += 20 + Math.max(0, remain);
+        scoreEl.textContent = score;
+        btn.classList.add("ok");
+      } else {
+        btn.classList.add("bad");
+        reveal(q);
+      }
+      setTimeout(next, 900);
+    }
+
+    function timeout() {
+      if (!answering) return;
+      lock();
+      reveal(QUESTIONS[idx]);
+      setTimeout(next, 900);
+    }
+
     function next() {
-      if (state !== "playing") return;
-      round++;
-      if (roundEl) roundEl.textContent = round;
-      if (round > 10) { end(); return; }
-      clearCells();
-      activeIdx = Math.floor(Math.random() * cells.length);
-      cells[activeIdx].classList.add("on");
-      t0 = performance.now();
-      to = setTimeout(function () { miss(); }, 2000);
+      idx++;
+      if (idx >= QUESTIONS.length) { end(); return; }
+      show();
     }
-
-    function miss() {
-      if (state !== "playing") return;
-      clearTimeout(to);
-      times.push(2000);
-      cells[activeIdx].classList.add("miss");
-      setTimeout(next, 360);
-    }
-
-    function hit(idx) {
-      if (state !== "playing" || idx !== activeIdx) return;
-      clearTimeout(to);
-      times.push(Math.round(performance.now() - t0));
-      cells[idx].className = "reflex-cell hit";
-      setTimeout(next, 320);
-    }
-
-    cells.forEach(function (c, i) { c.addEventListener("click", function () { hit(i); }); });
 
     startBtn.addEventListener("click", function () {
-      times = []; round = 0; state = "playing";
-      clearCells();
-      if (resultEl) resultEl.textContent = "看到灯亮，立刻点它";
-      if (roundEl) roundEl.textContent = "0";
-      startBtn.textContent = "进行中…";
-      setTimeout(next, 250);
+      if (state === "playing") return;
+      state = "playing"; idx = 0; score = 0;
+      scoreEl.textContent = "0";
+      startBtn.textContent = "答题中…";
+      show();
     });
   }
 

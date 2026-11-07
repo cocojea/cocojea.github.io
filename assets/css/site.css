@@ -476,3 +476,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
 .side-toc-panel a.on{color:var(--magenta);border-left-color:var(--magenta);
   background:linear-gradient(90deg,rgba(255,46,136,.1),transparent)}
 @media (max-width:760px){.side-toc{display:none}}
+/* ===== CAN 信号解码挑战 ===== */
+.decoder{display:grid;gap:12px}
+.dec-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim)}
+.dec-head .t{color:var(--acid);font-size:12px}
+.dec-frame{display:flex;align-items:center;gap:12px;background:#08080f;border:1px solid var(--line);padding:14px 16px;flex-wrap:wrap}
+.dec-frame .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--faint)}
+.dec-frame code{font-family:var(--mono);font-size:16px;letter-spacing:.12em;color:var(--cyan)}
+.dec-spec{font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.7;border-left:2px solid var(--magenta);padding-left:10px;min-height:2.6em}
+.dec-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dec-opts button{font-family:var(--mono);font-size:16px;padding:12px;background:#0a0a14;border:1px solid var(--line2);color:var(--dim);cursor:pointer;transition:.15s}
+.dec-opts button:hover{color:var(--cyan);border-color:var(--cyan)}
+.dec-opts button.ok{background:rgba(204,255,0,.15);border-color:var(--acid);color:var(--acid)}
+.dec-opts button.bad{background:rgba(255,46,136,.15);border-color:var(--magenta);color:var(--magenta)}
+.dec-opts button.dim{opacity:.4}
