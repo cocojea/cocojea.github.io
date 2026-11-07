@@ -83,7 +83,7 @@
     var N = 20, CELL = Math.round(cv.width / N);
     var snake = [], dir = {}, ndir = {}, food = {}, score = 0, best = 0,
         running = false, paused = false, timer = null, speed = 110,
-        flash = 0, frame = 0;
+        frame = 0, hue = 185, hueTarget = 185;
     var scoreEl = $("#snakeScore"), lenEl = $("#snakeLen"), bestEl = $("#snakeBest"),
         startBtn = $("#snakeStart"), pauseBtn = $("#snakePause");
 
@@ -99,11 +99,10 @@
       }
     }
     function setScore() { if (scoreEl) scoreEl.textContent = score; if (lenEl) lenEl.textContent = snake.length; }
-    function hue() { return (185 + score * 10) % 360; }
 
     function reset() {
       snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
-      dir = { x: 1, y: 0 }; ndir = dir; score = 0; speed = 110; flash = 0; frame = 0;
+      dir = { x: 1, y: 0 }; ndir = dir; score = 0; speed = 110; frame = 0; hue = 185; hueTarget = 185;
       placeFood(); setScore(); draw();
     }
 
@@ -111,14 +110,6 @@
       ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.fillStyle = "#06060c"; ctx.fillRect(0, 0, cv.width, cv.height);
 
-      // 吃豆闪光
-      if (flash > 0) {
-        var a = Math.min(1, flash / 240);
-        var g = ctx.createRadialGradient(cv.width / 2, cv.height / 2, 10, cv.width / 2, cv.height / 2, cv.width / 2);
-        g.addColorStop(0, "rgba(204,255,0," + (0.22 * a).toFixed(3) + ")");
-        g.addColorStop(1, "transparent");
-        ctx.fillStyle = g; ctx.fillRect(0, 0, cv.width, cv.height);
-      }
 
       // 网格
       ctx.strokeStyle = "rgba(236,238,247,.05)"; ctx.lineWidth = 1;
@@ -135,7 +126,7 @@
       ctx.shadowBlur = 0;
 
       // 蛇身（颜色随分数渐变，头部发光增强）
-      var h = hue();
+      var h = ((hue % 360) + 360) % 360;
       snake.forEach(function (s, idx) {
         var head = idx === 0;
         ctx.fillStyle = head ? "hsl(" + h + ",100%,72%)" : "hsl(" + h + ",100%,55%)";
@@ -164,7 +155,7 @@
 
     function step() {
       if (!running || paused) return;
-      if (flash > 0) flash = Math.max(0, flash - speed);
+      hue += (hueTarget - hue) * 0.18;
       frame++;
       dir = ndir;
       var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
@@ -174,7 +165,7 @@
       }
       snake.unshift(head);
       if (head.x === food.x && head.y === food.y) {
-        score++; flash = 240; setScore();
+        score++; hueTarget = 185 + score * 10; setScore();
         if (score > best) { best = score; localStorage.setItem("snakeBest", String(best)); if (bestEl) bestEl.textContent = best; }
         speed = Math.max(65, 110 - score * 6);
         placeFood();
