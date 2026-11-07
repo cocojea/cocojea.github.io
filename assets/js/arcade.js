@@ -69,7 +69,7 @@
       moves = 0; matched = 0; first = second = null; lock = false;
       if (movesEl) movesEl.textContent = "0";
       if (resultEl) resultEl.textContent = "翻开两张，找相同的指示灯";
-      if (startBtn) startBtn.textContent = "进行中…";
+      if (startBtn) startBtn.textContent = "重新开始";
       render();
     });
 
