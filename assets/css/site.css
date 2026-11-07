@@ -474,3 +474,16 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
 /* ===== 座右铭（右下角小字） ===== */
 .motto-mini{text-align:right;margin:0 0 40px;font-size:13px;letter-spacing:.04em;color:var(--dim);min-height:1.6em}
 .motto-mini .caret{width:6px;height:1em}
+/* ===== 贪吃蛇排行榜 ===== */
+.leaderboard{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.lb-head{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);margin-bottom:8px;text-transform:uppercase}
+.lb-id b{color:var(--cyan);cursor:pointer;border-bottom:1px dashed rgba(0,230,255,.5)}
+.lb-id b:hover{color:var(--magenta);border-color:var(--magenta)}
+#snakeBoard{list-style:none;margin:0;padding:0}
+#snakeBoard li{display:flex;align-items:center;gap:10px;padding:5px 0;font-family:var(--mono);font-size:11px;color:var(--dim);border-bottom:1px solid rgba(236,238,247,.05)}
+#snakeBoard li:last-child{border-bottom:0}
+#snakeBoard .rank{color:var(--faint);width:18px;flex:0 0 auto}
+#snakeBoard .id{color:var(--ink);flex:0 0 auto}
+#snakeBoard .score{color:var(--acid);margin-left:auto}
+#snakeBoard li.you .id{color:var(--magenta)}
+#snakeBoard li.empty{justify-content:center;color:var(--faint)}
