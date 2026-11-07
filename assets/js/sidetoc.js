@@ -1,4 +1,4 @@
-/* sidetoc.js — 左侧目录（默认展开，可点击收起）
+/* sidetoc.js — 左侧目录（常显、无收起、纯文本，融入页面）
    文章页已有 .toc 时自动跳过 */
 (function () {
   "use strict";
@@ -16,10 +16,14 @@
   });
   if (items.length < 2) return;
 
-  var tab = document.createElement("button");
-  tab.type = "button";
-  tab.className = "side-toc-tab";
-  tab.setAttribute("aria-expanded", "true");
+  var nav = document.createElement("nav");
+  nav.className = "side-toc";
+  nav.setAttribute("aria-label", "页面目录");
+
+  var label = document.createElement("span");
+  label.className = "side-toc-label";
+  label.textContent = "目录";
+  nav.appendChild(label);
 
   var ol = document.createElement("ol");
   items.forEach(function (it) {
@@ -35,36 +39,8 @@
     li.appendChild(a);
     ol.appendChild(li);
   });
-
-  var panel = document.createElement("nav");
-  panel.className = "side-toc-panel";
-  panel.setAttribute("aria-label", "页面目录");
-  panel.appendChild(ol);
-
-  var wrap = document.createElement("div");
-  wrap.className = "side-toc";
-  wrap.appendChild(tab);   // 左：收起把手
-  wrap.appendChild(panel); // 右：目录面板
-  document.body.appendChild(wrap);
-
-  var open = true;
-  function setOpen(v) {
-    open = v;
-    wrap.classList.toggle("open", v);
-    tab.setAttribute("aria-expanded", String(v));
-    tab.innerHTML = v
-      ? '<span class="tic">&#10005;</span><span class="txt">收起</span>'
-      : '<span class="tic">&#9776;</span><span class="txt">目录</span>';
-  }
-  setOpen(true);
-  tab.addEventListener("click", function () { setOpen(!open); });
-
-  document.addEventListener("click", function (e) {
-    if (open && !wrap.contains(e.target)) setOpen(false);
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") setOpen(false);
-  });
+  nav.appendChild(ol);
+  document.body.appendChild(nav);
 
   // 滚动高亮当前章节
   var links = $$("a", ol);

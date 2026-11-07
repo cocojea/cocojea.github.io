@@ -446,27 +446,16 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
   font-size:14px;cursor:pointer;transition:.15s}
 .dpad button:hover{color:var(--cyan);border-color:var(--cyan)}
 @media (max-width:900px){.arcade-grid{grid-template-columns:1fr}}
-/* ===== 侧边折叠目录 ===== */
-.side-toc{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:96;display:flex;align-items:center}
-.side-toc-tab{display:flex;flex-direction:column;align-items:center;gap:6px;
-  padding:14px 8px;background:rgba(8,8,14,.85);border:1px solid var(--line2);border-left:none;
-  color:var(--dim);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
-  transition:.25s;backdrop-filter:blur(8px)}
-.side-toc-tab .tic{font-size:14px;color:var(--cyan)}
-.side-toc-tab:hover{color:var(--ink);border-color:var(--cyan)}
-.side-toc.open .side-toc-tab{color:var(--magenta);border-color:var(--magenta)}
-.side-toc-panel{width:0;overflow:hidden;max-height:70vh;opacity:0;
-  transition:width .3s var(--ease),opacity .3s var(--ease);
-  background:rgba(8,8,14,.92);border:1px solid var(--line2);border-left:none;
-  backdrop-filter:blur(10px)}
-.side-toc.open .side-toc-panel{width:224px;opacity:1}
-.side-toc-panel ol{list-style:none;margin:0;padding:12px 0;min-width:208px}
-.side-toc-panel a{display:block;padding:8px 16px;font-size:12.5px;color:var(--dim);
-  border-left:2px solid transparent;transition:.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.side-toc-panel a:hover{color:var(--ink)}
-.side-toc-panel a.on{color:var(--magenta);border-left-color:var(--magenta);
-  background:linear-gradient(90deg,rgba(255,46,136,.1),transparent)}
-@media (max-width:760px){.side-toc{display:none}}
+/* ===== 左侧目录 ===== */
+.side-toc{position:fixed;left:28px;top:120px;z-index:90;opacity:.92;transition:opacity .3s}
+.side-toc:hover{opacity:1}
+.side-toc-label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.22em;color:var(--faint);margin-bottom:12px;text-transform:uppercase}
+.side-toc ol{list-style:none;margin:0;padding:0}
+.side-toc a{display:block;padding:7px 0 7px 14px;font-size:12.5px;color:var(--dim);
+  border-left:2px solid transparent;transition:.2s;white-space:nowrap}
+.side-toc a:hover{color:var(--ink)}
+.side-toc a.on{color:var(--magenta);border-left-color:var(--magenta);background:linear-gradient(90deg,rgba(255,46,136,.1),transparent)}
+@media (max-width:1120px){.side-toc{display:none}}
 
 /* ===== 指示灯翻牌配对 ===== */
 .match-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
