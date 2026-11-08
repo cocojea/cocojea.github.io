@@ -85,58 +85,10 @@
         running = false, paused = false, timer = null, speed = 110,
         frame = 0, hue = 185, hueTarget = 185;
     var scoreEl = $("#snakeScore"), lenEl = $("#snakeLen"), bestEl = $("#snakeBest"),
-        startBtn = $("#snakeStart"), pauseBtn = $("#snakePause"),
-        idEl = $("#snakeId"), boardEl = $("#snakeBoard");
+        startBtn = $("#snakeStart"), pauseBtn = $("#snakePause");
 
     best = parseInt(localStorage.getItem("snakeBest") || "0", 10);
     if (bestEl) bestEl.textContent = best;
-
-    /* —— 玩家 ID 与本地排行榜 —— */
-    var playerId = localStorage.getItem("snakePlayerId");
-    if (!playerId) { playerId = String(Math.floor(1000 + Math.random() * 9000)); localStorage.setItem("snakePlayerId", playerId); }
-    if (idEl) {
-      idEl.textContent = playerId;
-      idEl.addEventListener("click", function () {
-        var n = prompt("输入你的玩家 ID（数字，最多 12 位）", playerId);
-        if (n && n.trim()) {
-          n = n.trim().slice(0, 12);
-          playerId = n; localStorage.setItem("snakePlayerId", n);
-          idEl.textContent = n; renderBoard();
-        }
-      });
-    }
-    function getBoard() {
-      try { return JSON.parse(localStorage.getItem("snakeLeaderboard") || "[]"); }
-      catch (e) { return []; }
-    }
-    function saveRecord(s, len) {
-      var b = getBoard();
-      b.push({ id: playerId, score: s, len: len, t: Date.now() });
-      b.sort(function (a, c) { return c.score - a.score; });
-      localStorage.setItem("snakeLeaderboard", JSON.stringify(b.slice(0, 50)));
-    }
-    function renderBoard() {
-      if (!boardEl) return;
-      boardEl.innerHTML = "";
-      var b = getBoard();
-      if (!b.length) {
-        var li = document.createElement("li");
-        li.className = "empty";
-        li.textContent = "暂无记录，先来一局";
-        boardEl.appendChild(li);
-        return;
-      }
-      b.slice(0, 8).forEach(function (r, i) {
-        var li = document.createElement("li");
-        if (r.id === playerId) li.className = "you";
-        var rk = document.createElement("span"); rk.className = "rank"; rk.textContent = (i + 1) + ".";
-        var id = document.createElement("span"); id.className = "id"; id.textContent = r.id;
-        var sc = document.createElement("span"); sc.className = "score"; sc.textContent = r.score + " 分 · 长 " + r.len;
-        li.appendChild(rk); li.appendChild(id); li.appendChild(sc);
-        boardEl.appendChild(li);
-      });
-    }
-    renderBoard();
 
     function rnd(n) { return Math.floor(Math.random() * n); }
     function placeFood() {
@@ -241,7 +193,6 @@
 
     function gameOver() {
       running = false; paused = false; clearTimeout(timer);
-      saveRecord(score, snake.length); renderBoard();
       draw(); if (startBtn) startBtn.textContent = "再玩一次"; if (pauseBtn) pauseBtn.textContent = "暂停";
     }
 
