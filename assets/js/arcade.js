@@ -19,10 +19,10 @@
     ];
     var LABELS = ["电池", "水温", "机油", "报警", "转向", "安全带", "胎压", "发动机"];
 
-    var movesEl = $("#matchMoves"), bestEl = $("#matchBest"), startBtn = $("#matchStart"), resultEl = $("#matchResult");
+    var movesEl = $("#matchMoves"), mBestEl = $("#matchBest"), mStartBtn = $("#matchStart"), resultEl = $("#matchResult");
     var deck = [], first = null, second = null, lock = false, moves = 0, matched = 0;
-    var best = parseInt(localStorage.getItem("matchBest") || "0", 10);
-    if (bestEl) bestEl.textContent = best > 0 ? best : "—";
+    var mBest = parseInt(localStorage.getItem("matchBest") || "0", 10);
+    if (mBestEl) mBestEl.textContent = mBest > 0 ? mBest : "—";
 
     function shuffle(a) { var b = a.slice(); for (var i = b.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = b[i]; b[i] = b[j]; b[j] = t; } return b; }
 
@@ -61,15 +61,15 @@
 
     function win() {
       if (resultEl) resultEl.textContent = "配对完成！用了 " + moves + " 步 · " + grade(moves);
-      if (best === 0 || moves < best) { best = moves; localStorage.setItem("matchBest", String(best)); if (bestEl) bestEl.textContent = best; }
-      if (startBtn) startBtn.textContent = "再玩一次";
+      if (mBest === 0 || moves < mBest) { mBest = moves; localStorage.setItem("matchBest", String(mBest)); if (mBestEl) mBestEl.textContent = mBest; }
+      if (mStartBtn) mStartBtn.textContent = "再玩一次";
     }
 
-    startBtn.addEventListener("click", function () {
+    mStartBtn.addEventListener("click", function () {
       moves = 0; matched = 0; first = second = null; lock = false;
       if (movesEl) movesEl.textContent = "0";
       if (resultEl) resultEl.textContent = "翻开两张，找相同的指示灯";
-      if (startBtn) startBtn.textContent = "重新开始";
+      if (mStartBtn) mStartBtn.textContent = "重新开始";
       render();
     });
 

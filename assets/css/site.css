@@ -400,7 +400,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
   .brand{font-size:11px}
 }
 @media (max-width:520px){
-  .nav-links a:nth-child(n+4){display:none}
+  .nav-links a:nth-child(n+5){display:none}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -455,7 +455,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--line);
   border-left:2px solid transparent;transition:.2s;white-space:nowrap}
 .side-toc a:hover{color:var(--ink)}
 .side-toc a.on{color:var(--magenta);border-left-color:var(--magenta);background:linear-gradient(90deg,rgba(255,46,136,.1),transparent)}
-@media (max-width:1120px){.side-toc{display:none}}
+@media (max-width:1460px){.side-toc{display:none}}
 
 /* ===== 指示灯翻牌配对 ===== */
 .match-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
