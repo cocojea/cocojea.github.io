@@ -315,7 +315,19 @@ body{background:#05050a}
 
 <script>
 document.querySelectorAll('#nav button').forEach(b=>{b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.ch').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.c).classList.add('on')}});
-function cv(f){const o=document.getElementById('cvOut');let d;try{if(f==='d'){const v=document.getElementById('dI').value.trim();if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('d');return}d=parseInt(v,10);if(isNaN(d)||d<0)throw new Error('请输入非负整数')}else if(f==='b'){const v=document.getElementById('bI').value.trim().replace(/\s/g,'');if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('b');return}if(!/^[01]+$/.test(v))throw new Error('只能包含0和1');d=parseInt(v,2)}else{const v=document.getElementById('hI').value.trim().replace(/^0x/i,'');if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('h');return}if(!/^[0-9a-fA-F]+$/.test(v))throw new Error('无效字符');d=parseInt(v,16)}const b=d.toString(2),h=d.toString(16).toUpperCase();if(f!=='d')document.getElementById('dI').value=d;if(f!=='b')document.getElementById('bI').value=b;if(f!=='h')document.getElementById('hI').value=h;const bg=b.replace(/\B(?=(\d{4})+(?!\d))/g,' ');let s=`DEC: <span class="b">${d}</span> | BIN: <span class="b">${b}</span> (${bg}) | HEX: <span class="b">0x${h}</span> | 位宽: <span class="b">${b.length}bit</span>`;if(b.length>4){const p=b.padStart(Math.ceil(b.length/4)*4,'0');const gs=p.match(/.{4}/g);const hs=gs.map(g=>parseInt(g,2).toString(16).toUpperCase());s+=`<br>4位分组: <span style="color:#c9a0ff">${gs.join(' ')}</span> → <span class="b">${hs.join('')}</span>`}o.innerHTML=s}catch(e){o.innerHTML=`<span style="color:#ff6b6b">❌ ${e.message}</span>`}}
+function cv(f){const o=document.getElementById('cvOut');try{let d;
+if(f==='d'){const v=document.getElementById('dI').value.trim();if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('d');return}if(!/^[0-9]+$/.test(v))throw new Error('请输入非负整数');d=BigInt(v)}
+else if(f==='b'){const v=document.getElementById('bI').value.trim().replace(/\s/g,'');if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('b');return}if(!/^[01]+$/.test(v))throw new Error('只能包含0和1');d=BigInt('0b'+v)}
+else{const v=document.getElementById('hI').value.trim().replace(/^0x/i,'');if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('h');return}if(!/^[0-9a-fA-F]+$/.test(v))throw new Error('无效字符');d=BigInt('0x'+v)}
+const b=d.toString(2),h=d.toString(16).toUpperCase(),dec=d.toString(10);
+if(f!=='d')document.getElementById('dI').value=dec;
+if(f!=='b')document.getElementById('bI').value=b;
+if(f!=='h')document.getElementById('hI').value=h;
+const bg=b.replace(/\B(?=(\d{4})+(?!\d))/g,' ');
+let s=`DEC: <span class="b">${dec}</span> | BIN: <span class="b">${b}</span> (${bg}) | HEX: <span class="b">0x${h}</span> | 位宽: <span class="b">${b.length}bit</span>`;
+if(b.length>4){const p=b.padStart(Math.ceil(b.length/4)*4,'0');const gs=p.match(/.{4}/g);const hs=gs.map(g=>parseInt(g,2).toString(16).toUpperCase());s+=`<br>4位分组: <span style="color:#c9a0ff">${gs.join(' ')}</span> → <span class="b">${hs.join('')}</span>`}
+if(b.length>53)s+=`<br><span style="color:#ffb74d">已超过 2^53，本结果用 BigInt 精确计算</span>`;
+o.innerHTML=s}catch(e){o.innerHTML=`<span style="color:#ff6b6b">❌ ${e.message}</span>`}}
 function cI(k){if(k!=='d')document.getElementById('dI').value='';if(k!=='b')document.getElementById('bI').value='';if(k!=='h')document.getElementById('hI').value=''}
 let B=[0,0,0,0,0,0,0,0];const W=[128,64,32,16,8,4,2,1];
 function rB2(){const v=document.getElementById('bV');v.innerHTML='';B.forEach((b,i)=>{const c=document.createElement('div');c.className='bc'+(b?' on':'');c.innerHTML=`<div class="v">${b}</div><div class="w">${W[i]}</div>`;c.onclick=()=>{B[i]=B[i]?0:1;c.classList.add('pop');setTimeout(()=>c.classList.remove('pop'),300);rB2()};v.appendChild(c)});const d=B.reduce((s,b,i)=>s+b*W[i],0);document.getElementById('vB').textContent=B.join('');document.getElementById('vD').textContent=d;document.getElementById('vH').textContent='0x'+d.toString(16).toUpperCase().padStart(2,'0')}
