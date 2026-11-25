@@ -156,9 +156,92 @@ html{scroll-behavior:smooth}
   .bl-links{gap:14px;width:100%;margin-left:0;justify-content:flex-start}
   .bl-tag{display:none}
 }
+
+/* ================= 博客主页风格的背景层 ================= */
+body{background:#05050a}
+
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-glow{
+  position:absolute;inset:-20%;
+  background:
+    radial-gradient(38% 42% at 12% 8%,rgba(123,45,255,.30),transparent 65%),
+    radial-gradient(34% 38% at 88% 18%,rgba(0,230,255,.22),transparent 65%),
+    radial-gradient(46% 44% at 72% 92%,rgba(255,46,136,.24),transparent 68%),
+    radial-gradient(30% 30% at 20% 78%,rgba(204,255,0,.08),transparent 70%);
+  filter:blur(18px);
+}
+.grid-floor{
+  position:absolute;left:-45%;right:-45%;bottom:-10vh;height:78vh;
+  transform:perspective(1400px) rotateX(64deg);transform-origin:bottom center;
+  background-image:
+    linear-gradient(rgba(0,230,255,.42) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,46,136,.30) 1px,transparent 1px);
+  background-size:88px 88px;
+  -webkit-mask-image:linear-gradient(to top,rgba(0,0,0,.95) 0%,rgba(0,0,0,.5) 45%,transparent 88%);
+  mask-image:linear-gradient(to top,rgba(0,0,0,.95) 0%,rgba(0,0,0,.5) 45%,transparent 88%);
+  animation:floorRun 9s linear infinite;opacity:.8;
+}
+@keyframes floorRun{to{background-position:0 84px,84px 0}}
+.scanlines{position:absolute;inset:0;opacity:.35;mix-blend-mode:overlay;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,.055) 0 1px,transparent 1px 3px)}
+.sweep{position:absolute;left:0;right:0;height:180px;
+  background:linear-gradient(to bottom,transparent,rgba(0,230,255,.055),transparent);
+  animation:sweepDown 7.5s linear infinite}
+@keyframes sweepDown{0%{top:-200px}100%{top:100%}}
+.noise{position:absolute;inset:0;opacity:.055;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,transparent 45%,rgba(0,0,0,.52) 100%)}
+
+.progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:220;background:rgba(255,255,255,.05)}
+.progress i{display:block;height:100%;transform:scaleX(0);transform-origin:0 50%;
+  background:linear-gradient(90deg,#00e6ff,#ff2e88 55%,#ccff00);
+  box-shadow:0 0 14px rgba(255,46,136,.9);transition:transform .08s linear}
+
+/* 阅读性保护 */
+.bl-bar{z-index:200}
+.wrap,.bl-foot{position:relative;z-index:1}
+.cd{
+  background:rgba(13,13,32,.90);
+  border-color:rgba(120,120,200,.20);
+  backdrop-filter:blur(6px) saturate(115%);
+  -webkit-backdrop-filter:blur(6px) saturate(115%);
+  box-shadow:0 10px 30px -18px rgba(0,0,0,.9);
+}
+.cd p,.cd li{color:#c2c4d8}
+.cd h2{text-shadow:0 0 24px rgba(123,47,247,.25)}
+.nav{
+  background:rgba(5,5,10,.78);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  border-bottom:1px solid rgba(236,238,247,.10);
+  padding-bottom:10px;
+}
+.fm,.msg-decoder,.canoe-sim{background:rgba(8,8,20,.94)}
+.bl-bar{background:rgba(5,5,10,.72);backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%)}
+
+@media(max-width:640px){
+  .scanlines,.sweep{display:none}
+  .bg-glow{filter:blur(26px);opacity:.85}
+}
+@media(prefers-reduced-motion:reduce){
+  .grid-floor,.sweep{animation:none}
+}
+
 </style>
 </head>
 <body>
+
+<div class="progress"><i></i></div>
+
+<div class="bg" aria-hidden="true">
+  <div class="bg-glow"></div>
+  <div class="grid-floor"></div>
+  <div class="scanlines"></div>
+  <div class="sweep"></div>
+  <div class="noise"></div>
+  <div class="vignette"></div>
+</div>
 
 <header class="bl-bar">
   <a class="bl-brand" href="index.html">cocojee<b>//</b>blog</a>
@@ -258,6 +341,13 @@ function cQ2(btn,sel){if(btn.parentElement.querySelector('.ok,.no'))return;q2.t+
 function resetQ2(){q2={c:0,t:0};document.getElementById('q2c').textContent='0';document.getElementById('q2t').textContent='0';document.getElementById('q2p').textContent='0%';rQ2()}rQ2();
 function chkAns1(){const v=parseFloat(document.getElementById('ans1').value);const r=document.getElementById('ans1R');if(isNaN(v)){r.innerHTML='<span style="color:#ff6b6b">请输入数字</span>';return}if(Math.abs(v-10.25)<0.1){r.innerHTML=`<span style="color:#00c853;font-weight:700">✅ 正确！</span><br>41 × 0.25 = <b>10.25 rpm</b>`}else{r.innerHTML=`<span style="color:#ff5252">❌ 再算算</span> <button class="btn btn-sm" onclick="document.getElementById('ans1R').innerHTML='<span style=\\'color:#ffb74d\\'>Byte3=0x29, Byte4=0x00 → 拼接=000000101001=41<br>41 × 0.25 = 10.25 rpm</span>'">看答案</button>`}}
 function chkAns2(){const v=parseFloat(document.getElementById('ans2').value);const r=document.getElementById('ans2R');if(isNaN(v)){r.innerHTML='<span style="color:#ff6b6b">请输入数字</span>';return}if(Math.abs(v-62.55)<0.5){r.innerHTML=`<span style="color:#00c853;font-weight:700">✅ 正确！</span><br>1112 × 0.05625 = <b>62.55 km/h</b>`}else{r.innerHTML=`<span style="color:#ff5252">❌ 再算算</span> <button class="btn btn-sm" onclick="document.getElementById('ans2R').innerHTML='<span style=\\'color:#ffb74d\\'>Byte5=0x58, Byte6=0x14 → 提取11bit=1112<br>1112 × 0.05625 = 62.55 km/h</span>'">看答案</button>`}}
+</script>
+
+<script>
+(()=>{const bar=document.querySelector('.progress i');if(!bar)return;
+const upd=()=>{const h=document.documentElement.scrollHeight-innerHeight;
+bar.style.transform='scaleX('+(h>0?Math.min(1,scrollY/h):0)+')'};
+addEventListener('scroll',upd,{passive:true});addEventListener('resize',upd);upd()})();
 </script>
 </body>
 </html>
