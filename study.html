@@ -89,11 +89,13 @@ header h1{font-size:1.8em;background:linear-gradient(135deg,#00d2ff,#7b2ff7,#ff6
 @keyframes byteClick{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
 .bin-expand{margin:10px 0;padding:12px;background:#0c0c20;border-radius:8px;display:none}
 .bin-expand.show{display:block;animation:up .2s}
-.bin-row{display:flex;gap:2px;justify-content:center;margin:4px 0;font-family:Consolas,monospace}
-.bin-bit{width:34px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;font-size:.85em;font-weight:600;transition:all .2s;line-height:1}
-.bin-bit.b0{background:#151530;color:#555}
-.bin-bit.b1{background:rgba(123,47,247,.15);color:#c9a0ff}
-.bin-byte-label{font-size:.7em;color:#666;width:50px;text-align:right;margin-right:6px;font-family:Consolas,monospace;display:flex;align-items:center;justify-content:flex-end}
+.bin-row{display:flex;gap:2px;font-family:Consolas,monospace}
+.bin-idx-row{display:flex;gap:2px;font-family:Consolas,monospace;margin-top:3px}
+.bin-idx-row span{width:34px;text-align:center;font-size:.38em;color:#5b5b7d;letter-spacing:.04em}
+.bin-bit{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:.95em;font-weight:700;transition:all .2s;line-height:1}
+.bin-bit.b0{background:#141428;color:#7c7c9c}
+.bin-bit.b1{background:rgba(123,47,247,.24);color:#e6d8ff;box-shadow:inset 0 0 0 1px rgba(201,160,255,.38)}
+.bin-byte-label{font-size:.7em;color:#666;width:56px;text-align:right;margin-right:6px;font-family:Consolas,monospace;display:block;line-height:1.35;white-space:nowrap}
 .calc-steps{margin:12px 0}
 .calc-step{display:flex;gap:12px;align-items:flex-start;padding:10px 14px;border-radius:8px;margin:6px 0;background:#0c0c20;border-left:3px solid #333;transition:all .3s;opacity:.4}
 .calc-step.done{opacity:1;border-left-color:#7b2ff7}
@@ -134,8 +136,7 @@ header h1{font-size:1.8em;background:linear-gradient(135deg,#00d2ff,#7b2ff7,#ff6
 .fs3{border-color:#ffb74d;color:#ffb74d;background:rgba(255,183,77,.05)}
 .fs4{border-color:#66bb6a;color:#66bb6a;background:rgba(102,187,106,.05)}
 .fs5{border-color:#ff6b6b;color:#ff6b6b;background:rgba(255,107,107,.05)}
-@media(max-width:600px){.cd{padding:14px}.msg-byte{width:60px}.msg-byte .hex-val{font-size:1.1em;padding:6px 2px}.bin-bit{width:27px;height:36px;font-size:.75em}.nav button{font-size:.68em;padding:5px 8px}}
-</style>
+@media(max-width:600px){.cd{padding:14px}.bin-idx-row span{width:27px}.bin-byte-label{width:64px}.msg-byte{width:60px}.msg-byte .hex-val{font-size:1.1em;padding:6px 2px}.bin-bit{width:27px;height:27px;font-size:.8em}.nav button{font-size:.68em;padding:5px 8px}}</style>
 <style>
 /* ===== 博客外壳（仅本页，避免与模块自身样式冲突） ===== */
 html{scroll-behavior:smooth}
@@ -344,7 +345,7 @@ function cQ1(btn,sel){if(btn.parentElement.querySelector('.ok,.no'))return;q1.t+
 function nextQ1(){rQ1()}function resetQ1(){q1={c:0,t:0};document.getElementById('q1c').textContent='0';document.getElementById('q1t').textContent='0';rQ1()}rQ1();
 const demoBytes=[0x00,0x80,0x00,0x29,0x00,0x00,0x00,0x00];let expandedBytes=new Set();
 function toggleByte(i){const el=document.querySelectorAll('.msg-byte')[i];el.classList.remove('clicked');void el.offsetWidth;el.classList.add('clicked');setTimeout(()=>el.classList.remove('clicked'),400);if(expandedBytes.has(i))expandedBytes.delete(i);else expandedBytes.add(i);renderBinExpand();document.querySelectorAll('.msg-byte').forEach((el,idx)=>{el.classList.toggle('active',expandedBytes.has(idx))})}
-function renderBinExpand(){const el=document.getElementById('binExpand');if(expandedBytes.size===0){el.classList.remove('show');return}el.classList.add('show');let html='';const sorted=[...expandedBytes].sort();sorted.forEach(i=>{const v=demoBytes[i];html+=`<div style="display:flex;align-items:center;gap:4px;margin:3px 0"><div class="bin-byte-label">Byte${i} = 0x${v.toString(16).toUpperCase().padStart(2,'0')}</div><div class="bin-row">`;for(let j=7;j>=0;j--){const bit=(v>>j)&1;const motorolaBitNum=i*8+j;html+=`<div class="bin-bit ${bit?'b1':'b0'}" title="Bit${motorolaBitNum}">${bit}<span style="font-size:.4em;display:block;color:#6a6a95;margin-top:3px;letter-spacing:.02em">#${motorolaBitNum}</span></div>`}html+=`</div></div>`});el.innerHTML=html}
+function renderBinExpand(){const el=document.getElementById('binExpand');if(expandedBytes.size===0){el.classList.remove('show');return}el.classList.add('show');let html='';const sorted=[...expandedBytes].sort();sorted.forEach(i=>{const v=demoBytes[i];let bits='',idx='';for(let j=7;j>=0;j--){const bit=(v>>j)&1;const num=i*8+j;bits+=`<div class="bin-bit ${bit?'b1':'b0'}" title="Bit${num}">${bit}</div>`;idx+=`<span>#${num}</span>`}html+=`<div style="display:flex;align-items:center;gap:4px;margin:4px 0 0"><div class="bin-byte-label">Byte${i}<br>= 0x${v.toString(16).toUpperCase().padStart(2,'0')}</div><div class="bin-row">${bits}</div></div><div style="display:flex;gap:4px;margin-bottom:8px"><div class="bin-byte-label" style="visibility:hidden">.</div><div class="bin-idx-row">${idx}</div></div>`});el.innerHTML=html}
 let decodeTimer=null;function startDecode(){if(decodeTimer){clearTimeout(decodeTimer);decodeTimer=null;}expandedBytes.clear();expandedBytes.add(3);expandedBytes.add(4);document.querySelectorAll('.msg-byte').forEach((el,i)=>{el.classList.remove('active','in-signal');if(i===3||i===4)el.classList.add('in-signal')});renderBinExpand();const steps=document.querySelectorAll('#calcSteps .calc-step');steps.forEach(s=>{s.classList.remove('done','current')});const stepData=[{text:'<b>发动机转速信号</b>：起始位 31（Byte3 的 Bit7，即信号最高位），长度 12bit<br>涉及 <span class="r">Byte3</span> 全部 8 位与 <span class="r">Byte4</span> 的高 4 位'},{text:'Byte3 = 0x29 = <span class="o">0010 1001</span><br>Byte4 = 0x00 = <span class="o">0000 0000</span>，取高 4 位 <span class="o">0000</span>'},{text:'锯齿序：从 Bit31 往下取到 Byte3 的 Bit0，再跳到 Byte4 的 Bit7 继续取 4 位<br><span class="r">00101001</span> + <span class="r">0000</span> = <span class="b">0010 1001 0000</span>'},{text:'<span class="b">001010010000</span> = <span class="o">656</span> (0x290)'},{text:'物理值 = 656 × 0.25 + 0 = <span class="r" style="font-size:1.2em">164 rpm</span>'}];let si=0;function nextStep(){if(si>=stepData.length)return;steps.forEach((s,i)=>{s.classList.remove('current','done');if(i<si)s.classList.add('done');else if(i===si)s.classList.add('current')});steps[si].querySelector('.sc').innerHTML=stepData[si].text;si++;if(si<stepData.length)decodeTimer=setTimeout(nextStep,1500);else{decodeTimer=null;steps.forEach(s=>{s.classList.remove('current');s.classList.add('done')})}}nextStep()}
 function resetDecode(){if(decodeTimer){clearTimeout(decodeTimer);decodeTimer=null;}expandedBytes.clear();document.querySelectorAll('.msg-byte').forEach(el=>{el.classList.remove('active','in-signal')});document.getElementById('binExpand').classList.remove('show');document.getElementById('binExpand').innerHTML='';document.querySelectorAll('#calcSteps .calc-step').forEach(s=>{s.classList.remove('done','current')});const defaults=['确定信号所在的字节范围','将相关字节展开为二进制','按起始位和长度截取信号位','二进制转十进制（得到原始值Raw Value）','代入公式：物理值 = 原始值 × 因子 + 偏移'];document.querySelectorAll('#calcSteps .calc-step .sc').forEach((s,i)=>{s.innerHTML=defaults[i]})}
 function validateByte(inp){let v=inp.value.toUpperCase().replace(/[^0-9A-F]/g,'');if(v.length>2)v=v.substring(0,2);inp.value=v}
