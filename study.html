@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#05050a">
+<title>学习 · cocojee blog</title>
+<meta name="description" content="组合仪表学习手册：进制基础、仪表概述、CAN 通信、报文解读、台架测试与综合练习，六章交互式入门。">
+<meta name="author" content="cocojee">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习 · cocojee blog">
+<meta property="og:description" content="六章交互式组合仪表入门：进制、仪表、CAN、报文解读、台架测试与练习。">
+<meta property="og:locale" content="zh_CN">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#080818;color:#ddd;min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:20px}
+header{text-align:center;padding:20px 0 10px}
+header h1{font-size:1.8em;background:linear-gradient(135deg,#00d2ff,#7b2ff7,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin:16px 0 24px;position:sticky;top:0;z-index:100;background:#080818;padding:8px 0}
+.nav button{padding:8px 14px;border-radius:18px;border:2px solid #222;background:transparent;color:#777;font-size:.78em;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.nav button:hover{border-color:#444;color:#bbb}
+.nav button.on{border-color:#7b2ff7;color:#fff;background:rgba(123,47,247,.15)}
+.nav button .n{display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:rgba(255,255,255,.06);font-size:.7em;margin-right:3px}
+.nav button.on .n{background:rgba(123,47,247,.3)}
+.ch{display:none;animation:up .3s}.ch.on{display:block}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.cd{background:#0f0f24;border:1px solid #1e1e3a;border-radius:12px;padding:22px;margin-bottom:16px}
+.cd h2{font-size:1.1em;color:#c9a0ff;margin-bottom:12px}
+.cd h3{font-size:.95em;color:#80c8ff;margin:12px 0 6px}
+.cd p,.cd li{font-size:.88em;line-height:1.8;color:#b0b0c0}
+.cd ul{padding-left:16px;margin:6px 0}
+.cd code{background:#1a1a35;padding:1px 5px;border-radius:3px;font-family:Consolas,monospace;color:#00d2ff;font-size:.9em}
+.box{border-radius:8px;padding:12px 16px;margin:10px 0;font-size:.86em;line-height:1.8}
+.box-info{background:rgba(123,47,247,.06);border:1px solid #2a2a55}
+.box-warn{background:rgba(255,107,107,.06);border:1px solid #4a2a2a}
+.box-tip{background:rgba(0,210,255,.05);border:1px solid #1a4a5a}
+.tb{width:100%;border-collapse:collapse;margin:10px 0;font-size:.82em}
+.tb th{background:#151530;padding:7px 10px;border:1px solid #2a2a45;color:#c9a0ff;font-weight:600;text-align:center}
+.tb td{padding:6px 10px;border:1px solid #1e1e38;text-align:center;font-family:Consolas,monospace}
+.tb tr:hover{background:rgba(123,47,247,.04)}
+.hl{color:#00d2ff;font-weight:700}
+.fm{background:#0a0a18;border:1px solid #222;border-radius:8px;padding:12px 16px;margin:8px 0;font-family:Consolas,monospace;font-size:.92em;line-height:1.9;text-align:center}
+.r{color:#ff6b6b;font-weight:700}.b{color:#00d2ff;font-weight:700}.o{color:#ffb74d;font-weight:700}.g{color:#66bb6a;font-weight:700}
+.btn{padding:6px 14px;border-radius:6px;border:1px solid #444;background:transparent;color:#999;cursor:pointer;font-size:.8em;transition:all .2s}
+.btn:hover{border-color:#7b2ff7;color:#fff}
+.btn-p{background:linear-gradient(135deg,#7b2ff7,#5b1fd7);border:none;color:#fff;font-weight:600}
+.btn-p:hover{box-shadow:0 2px 10px rgba(123,47,247,.3)}
+.btn-sm{padding:4px 10px;font-size:.75em}
+.inp{padding:6px 10px;border-radius:6px;border:1px solid #333;background:#0a0a18;color:#fff;font-family:Consolas,monospace;font-size:.85em;outline:none}
+.inp:focus{border-color:#7b2ff7}
+.conv3{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.conv3>div{flex:1;min-width:140px}
+.conv3 label{display:block;font-size:.72em;color:#777;margin-bottom:3px}
+.conv3 input{width:100%;padding:8px 10px;border-radius:6px;border:2px solid #2a2a40;background:#0a0a18;color:#fff;font-family:Consolas,monospace;font-size:.9em;outline:none}
+.conv3 input:focus{border-color:#7b2ff7}
+.conv-out{padding:10px 14px;background:#0a0a18;border:1px solid #222;border-radius:8px;font-family:Consolas,monospace;font-size:.85em;line-height:1.7;margin-top:8px;min-height:36px}
+.brow{display:flex;gap:3px;justify-content:center;margin:8px 0}
+.bc{width:50px;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;border:2px solid #2a2a40;background:#0a0a18;cursor:pointer;transition:all .2s;user-select:none}
+.bc .v{font-size:1.3em;font-weight:700;font-family:Consolas,monospace;color:#555}
+.bc .w{font-size:.58em;color:#444;margin-top:1px}
+.bc.on{border-color:#7b2ff7;background:rgba(123,47,247,.1)}
+.bc.on .v{color:#c9a0ff}
+.bc:hover{border-color:#444}
+.bc.pop{animation:pop .3s}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.binfo{text-align:center;font-family:Consolas,monospace;font-size:.9em;margin:6px 0}
+.binfo span{color:#00d2ff;font-weight:700}
+.frame{display:flex;height:48px;border-radius:6px;overflow:hidden;margin:10px 0;font-size:.65em;font-weight:600}
+.frame div{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;border-right:1px solid rgba(0,0,0,.3);padding:2px}
+.frame .fname{font-size:.9em;font-weight:700}
+.frame .fsize{font-size:.75em;opacity:.7}
+.msg-decoder{background:#0a0a18;border:1px solid #222;border-radius:10px;padding:16px;margin:12px 0}
+.msg-bytes{display:flex;gap:6px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.msg-byte{width:80px;text-align:center;cursor:pointer;transition:all .2s}
+.msg-byte .hex-val{font-family:Consolas,monospace;font-size:1.4em;font-weight:700;color:#00d2ff;padding:8px 4px;border-radius:6px;border:2px solid #2a2a40;background:#0f0f24;transition:all .2s}
+.msg-byte .byte-lbl{font-size:.65em;color:#666;margin-top:3px}
+.msg-byte:hover .hex-val{border-color:#555;background:#151530}
+.msg-byte.active .hex-val{border-color:#7b2ff7;background:rgba(123,47,247,.1);color:#c9a0ff}
+.msg-byte.in-signal .hex-val{border-color:#ff6b6b;background:rgba(255,107,107,.08);color:#ff6b6b}
+.msg-byte.in-signal.active .hex-val{border-color:#ff6b6b;background:rgba(255,107,107,.2);color:#ff8888;box-shadow:0 0 12px rgba(255,107,107,.3)}
+.msg-byte.clicked{animation:byteClick .4s}
+@keyframes byteClick{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
+.bin-expand{margin:10px 0;padding:12px;background:#0c0c20;border-radius:8px;display:none}
+.bin-expand.show{display:block;animation:up .2s}
+.bin-row{display:flex;gap:2px;justify-content:center;margin:4px 0;font-family:Consolas,monospace}
+.bin-bit{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:.85em;font-weight:600;transition:all .2s}
+.bin-bit.b0{background:#151530;color:#555}
+.bin-bit.b1{background:rgba(123,47,247,.15);color:#c9a0ff}
+.bin-byte-label{font-size:.7em;color:#666;width:50px;text-align:right;margin-right:6px;font-family:Consolas,monospace;display:flex;align-items:center;justify-content:flex-end}
+.calc-steps{margin:12px 0}
+.calc-step{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:8px;margin:6px 0;background:#0c0c20;border-left:3px solid #333;transition:all .3s;opacity:.4}
+.calc-step.done{opacity:1;border-left-color:#7b2ff7}
+.calc-step.current{opacity:1;border-left-color:#00d2ff;background:#0f0f28}
+.calc-step .sn{width:22px;height:22px;border-radius:50%;background:#222;color:#888;display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:700;flex-shrink:0}
+.calc-step.done .sn{background:#7b2ff7;color:#fff}
+.calc-step.current .sn{background:#00d2ff;color:#fff}
+.calc-step .sc{font-size:.85em;line-height:1.6;color:#999}
+.calc-step.done .sc,.calc-step.current .sc{color:#ddd}
+.canoe-sim{background:#0a0a18;border:1px solid #222;border-radius:10px;overflow:hidden;margin:12px 0}
+.canoe-toolbar{display:flex;gap:6px;padding:8px 12px;background:#111128;border-bottom:1px solid #222;align-items:center;flex-wrap:wrap}
+.canoe-toolbar .indicator{width:8px;height:8px;border-radius:50%;margin-right:4px}
+.canoe-toolbar .indicator.off{background:#555}.canoe-toolbar .indicator.on{background:#00c853;box-shadow:0 0 6px #00c853}
+.canoe-msg-list{max-height:300px;overflow-y:auto;font-family:Consolas,monospace;font-size:.78em}
+.canoe-row{display:flex;padding:4px 12px;border-bottom:1px solid #151530;align-items:center;gap:8px;transition:background .2s;cursor:pointer}
+.canoe-row:hover{background:rgba(123,47,247,.04)}
+.canoe-row .time{color:#666;width:70px;flex-shrink:0}
+.canoe-row .mid{color:#00d2ff;font-weight:700;width:50px;flex-shrink:0}
+.canoe-row .dir{color:#555;width:14px;flex-shrink:0;text-align:center}
+.canoe-row .dlc{color:#888;width:20px;flex-shrink:0;text-align:center}
+.canoe-row .data{flex:1;color:#c9a0ff;letter-spacing:1px}
+.canoe-row .decoded{color:#ffb74d;font-size:.9em;max-width:200px;text-align:right}
+.qz{margin:10px 0}
+.qz-q{font-size:.9em;margin-bottom:10px;line-height:1.7}
+.qz-opts{display:flex;gap:6px;flex-wrap:wrap}
+.qz-opt{padding:7px 14px;border-radius:6px;border:2px solid #2a2a40;background:transparent;color:#bbb;cursor:pointer;font-size:.85em;font-family:Consolas,monospace;transition:all .2s}
+.qz-opt:hover{border-color:#555}
+.qz-opt.ok{border-color:#00c853;background:rgba(0,200,83,.1);color:#00c853}
+.qz-opt.no{border-color:#ff5252;background:rgba(255,82,82,.08);color:#ff5252}
+.qz-fb{font-size:.82em;margin-top:6px;min-height:18px}
+.score{display:flex;gap:16px;align-items:center;padding:8px 12px;background:#0a0a18;border-radius:6px;margin-bottom:10px;font-size:.82em}
+.score .s{color:#00d2ff;font-weight:700}
+.flow{display:flex;gap:3px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.fs{padding:6px 12px;border-radius:6px;font-size:.72em;font-weight:600;border:1px solid;white-space:nowrap}
+.fa{color:#333;font-size:.9em}
+.fs1{border-color:#7b2ff7;color:#c9a0ff;background:rgba(123,47,247,.06)}
+.fs2{border-color:#00d2ff;color:#80c8ff;background:rgba(0,210,255,.05)}
+.fs3{border-color:#ffb74d;color:#ffb74d;background:rgba(255,183,77,.05)}
+.fs4{border-color:#66bb6a;color:#66bb6a;background:rgba(102,187,106,.05)}
+.fs5{border-color:#ff6b6b;color:#ff6b6b;background:rgba(255,107,107,.05)}
+@media(max-width:600px){.cd{padding:14px}.msg-byte{width:60px}.msg-byte .hex-val{font-size:1.1em;padding:6px 2px}.bin-bit{width:24px;height:24px;font-size:.75em}.nav button{font-size:.68em;padding:5px 8px}}
+</style>
+<style>
+/* ===== 博客外壳（仅本页，避免与模块自身样式冲突） ===== */
+html{scroll-behavior:smooth}
+.bl-bar{position:relative;z-index:200;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  padding:11px clamp(14px,4vw,30px);border-bottom:1px solid #1e1e3a;background:rgba(8,8,24,.94);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.bl-brand{font-family:Consolas,monospace;font-weight:700;font-size:.92em;letter-spacing:.05em;color:#dcdce8 !important;text-decoration:none}
+.bl-brand b{color:#7b2ff7}
+.bl-links{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto}
+.bl-links a{position:relative;color:#8a8aa3;text-decoration:none;font-size:.8em}
+.bl-links a:hover{color:#fff}
+.bl-links a.on{color:#00d2ff}
+.bl-links a.on::after{content:'';position:absolute;left:0;right:0;bottom:-7px;height:2px;
+  background:linear-gradient(90deg,#7b2ff7,#00d2ff)}
+.bl-tag{font-size:.62em;letter-spacing:.18em;color:#7b2ff7;border:1px solid #2a2a55;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.bl-foot{border-top:1px solid #1e1e3a;margin-top:44px;padding:24px 16px 30px;text-align:center;
+  font-size:.72em;line-height:2;color:#55556e}
+.bl-foot a{color:#8a8aa3;text-decoration:none;margin:0 9px}
+.bl-foot a:hover{color:#00d2ff}
+@media(max-width:620px){
+  .bl-bar{gap:10px;padding:10px 14px}
+  .bl-links{gap:14px;width:100%;margin-left:0;justify-content:flex-start}
+  .bl-tag{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="bl-bar">
+  <a class="bl-brand" href="index.html">cocojee<b>//</b>blog</a>
+  <nav class="bl-links" aria-label="主导航">
+    <a href="index.html">首页</a>
+    <a href="archives.html">日志</a>
+    <a href="about.html">关于我</a>
+    <a href="study.html" class="on">学习</a>
+    <a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+  <span class="bl-tag">STUDY MODE</span>
+</header>
+
+<div class="wrap">
+<header><h1>🚗 学习</h1></header>
+<div class="nav" id="nav">
+  <button class="on" data-c="c1"><span class="n">1</span>进制基础</button>
+  <button data-c="c2"><span class="n">2</span>仪表概述</button>
+  <button data-c="c3"><span class="n">3</span>CAN通信</button>
+  <button data-c="c4"><span class="n">4</span>报文解读</button>
+  <button data-c="c5"><span class="n">5</span>模拟测试</button>
+  <button data-c="c6"><span class="n">6</span>综合练习</button>
+</div>
+<div class="ch on" id="c1">
+<div class="cd"><h2>💡 一句话理解进制</h2><div class="box box-info">进制就是<b>打包规则</b>：十进制"满10进1"，二进制"满2进1"，十六进制"满16进1"。同一个数量，不同写法而已。</div><p style="margin-top:8px">就像同一杯水，可以用"毫升"也可以用"盎司"来描述，数值不同但水量一样。</p></div>
+<div class="cd"><h2>🔑 位权：每个位置的"身价"</h2><div class="fm" style="text-align:left">十进制 365 = 3×<span class="o">100</span> + 6×<span class="o">10</span> + 5×<span class="o">1</span><br>二进制 1011 = 1×<span class="b">8</span> + 0×<span class="b">4</span> + 1×<span class="b">2</span> + 1×<span class="b">1</span> = <span class="r">11</span><br>十六进制 2F = 2×<span class="o">16</span> + F(15)×<span class="o">1</span> = <span class="r">47</span></div><div class="box box-tip">核心公式：<b>数值 = 每位数字 × 基数^位序</b>（位序从右往左，从0开始）</div></div>
+<div class="cd"><h2>🔗 为什么1位十六进制 = 4位二进制？</h2><p>因为 <b>2⁴ = 16</b>，4位二进制刚好能表示16种状态(0000~1111)，和十六进制的16个数字(0~F)一一对应：</p><div class="box box-info" style="margin:12px 0"><b>为什么4位二进制能表示16种状态？</b><br><br>每一位二进制只有<b>2种可能</b>：0 或 1<br><br>• 1位二进制 → 2种状态：0, 1<br>• 2位二进制 → 2×2 = <b>4种</b>状态：00, 01, 10, 11<br>• 3位二进制 → 2×2×2 = <b>8种</b>状态：000, 001, 010, 011, 100, 101, 110, 111<br>• 4位二进制 → 2×2×2×2 = <b>16种</b>状态：0000, 0001, 0010, ..., 1111<br><br>就像抛硬币：抛1次有2种结果(正/反)，抛2次有2×2=4种结果(正正/正反/反正/反反)，抛4次就有2⁴=16种结果。<br><br>十六进制1位能表示16个数字(0~F)，4位二进制能表示16种状态(0000~1111)，<b>数量刚好相等</b>，所以可以一一对应。</div><table class="tb" style="max-width:500px"><tr><th>二进制</th><th>十六进制</th><th></th><th>二进制</th><th>十六进制</th></tr><tr><td>0000</td><td class="hl">0</td><td></td><td>1000</td><td class="hl">8</td></tr><tr><td>0001</td><td class="hl">1</td><td></td><td>1001</td><td class="hl">9</td></tr><tr><td>0010</td><td class="hl">2</td><td></td><td>1010</td><td class="hl">A</td></tr><tr><td>0011</td><td class="hl">3</td><td></td><td>1011</td><td class="hl">B</td></tr><tr><td>0100</td><td class="hl">4</td><td></td><td>1100</td><td class="hl">C</td></tr><tr><td>0101</td><td class="hl">5</td><td></td><td>1101</td><td class="hl">D</td></tr><tr><td>0110</td><td class="hl">6</td><td></td><td>1110</td><td class="hl">E</td></tr><tr><td>0111</td><td class="hl">7</td><td></td><td>1111</td><td class="hl">F</td></tr></table><div class="box box-info">3位只能表示8种(不够)，5位能表示32种(浪费)。<b>4位刚好</b>，这就是为什么是1:4的关系。</div></div>
+<div class="cd"><h2>🔄 实时转换器（随便输入试试）</h2><div class="conv3"><div><label>十进制</label><input id="dI" placeholder="255" oninput="cv('d')"></div><div><label>二进制</label><input id="bI" placeholder="11111111" oninput="cv('b')"></div><div><label>十六进制</label><input id="hI" placeholder="FF" oninput="cv('h')"></div></div><div class="conv-out" id="cvOut">输入任意数值，三种进制实时同步</div></div>
+<div class="cd"><h2>👁 点击体验：8个位 = 1个字节</h2><p style="color:#777;font-size:.82em;margin-bottom:6px">点击每个方块切换0/1，观察数值变化。每个位的"身价"标在下方：</p><div class="brow" id="bV"></div><div class="binfo">BIN: <span id="vB">00000000</span> &nbsp; DEC: <span id="vD">0</span> &nbsp; HEX: <span id="vH">0x00</span></div><div style="text-align:center;margin-top:6px"><button class="btn btn-sm" onclick="aB(1)">全1(=255)</button> <button class="btn btn-sm" onclick="aB(0)">清零</button> <button class="btn btn-sm" onclick="rB()">随机</button> <button class="btn btn-sm" onclick="sB(0xFF)">试试0xFF</button> <button class="btn btn-sm" onclick="sB(0xA5)">试试0xA5</button></div></div>
+<div class="cd"><h2>🧮 进制小测验</h2><div class="score"><span>得分: <span class="s" id="q1c">0</span>/<span id="q1t">0</span></span><button class="btn btn-sm" onclick="resetQ1()">换题</button></div><div id="q1Area"></div></div>
+</div>
+<div class="ch" id="c2">
+<div class="cd"><h2>🚗 组合仪表(ICM)是做什么的</h2><p>驾驶员获取车辆信息的<b>核心界面</b>。以K29为例：双指针(车速+转速) + 7寸彩屏(报警/行车电脑/倒车影像/蓝牙)。</p><h3>核心功能</h3><ul><li>显示车辆参数：车速、转速、油量/电量、水温</li><li>显示状态/报警：胎压、灯光、故障灯</li><li>行车电脑：功率、电耗、时间、小计里程</li><li>集成娱乐：蓝牙、倒车影像</li></ul></div>
+<div class="cd"><h2>🔌 仪表和谁打交道</h2><table class="tb"><tr><th>交互方式</th><th>对象</th><th>说明</th></tr><tr><td><b>CAN接收</b></td><td>CCU(VCU/BCM/BMS)、MCU、ADAS、EPS、ESC…</td><td>约150条信号，是主要数据来源</td></tr><tr><td><b>CAN外发</b></td><td>整车网络</td><td>安全带/制动液位/手刹状态 + 菜单开关</td></tr><tr><td><b>硬线</b></td><td>手刹、安全带、制动液位</td><td>PIN脚电平信号，作为CAN的备份/补充</td></tr><tr><td><b>硬件边界</b></td><td>仪表台、CAN总线、接插件</td><td>安装结构/终端电阻/线序匹配</td></tr></table><div class="box box-tip">重点：仪表通过CAN总线接收整车信号并显示，同时外发自身状态。理解CAN通信是仪表工程师的基本功。</div></div>
+<div class="cd"><h2>⚖️ 必须遵守的法规（以项目释放的法规排查清单为准）</h2><table class="tb"><tr><th>法规</th><th>管什么</th><th>关键要求</th></tr><tr><td>GB 15082</td><td>车速表</td><td>仪表显示车速 ≥ 实际车速，且 0≤V₁-V₂≤(5%~10%)×V₂+4</td></tr><tr><td>GB 4094</td><td>指示灯标志</td><td>所有指示灯的标志、颜色、尺寸必须符合标准</td></tr><tr><td>GB/T 19836</td><td>电动车仪表</td><td>行驶模式/档位/功率等特有显示</td></tr><tr><td>GB 44496</td><td>OTA升级</td><td>2026.1.1起实施，涉及OTA提示策略</td></tr><tr><td>GB 44495</td><td>信息安全</td><td>2026.1.1起实施，涉及加密芯片</td></tr></table></div>
+<div class="cd"><h2>📋 开发流程（了解即可）</h2><div class="flow"><div class="fs fs1">可行性分析</div><div class="fa">→</div><div class="fs fs2">概念设计</div><div class="fa">→</div><div class="fs fs3">工程设计</div><div class="fa">→</div><div class="fs fs4">设计验证(DV)</div><div class="fa">→</div><div class="fs fs1">设计确认(PV)</div><div class="fa">→</div><div class="fs fs5">量产一致性</div></div><p style="font-size:.82em;color:#777;margin-top:6px">每个阶段都有交付物：SSTS/CTS、DFMEA、DVP、BOM、法规校核报告等。</p></div>
+</div>
+<div class="ch" id="c3">
+<div class="cd"><h2>💡 CAN总线的物理本质</h2><p>CAN总线传的就是<b>二进制0和1</b>，物理上是两根线之间的<b>电压差</b>：</p><table class="tb"><tr><th>状态</th><th>CAN_H</th><th>CAN_L</th><th>压差</th><th>逻辑值</th></tr><tr><td>显性(Dominant)</td><td>3.5V</td><td>1.5V</td><td>2.0V</td><td class="hl">0</td></tr><tr><td>隐性(Recessive)</td><td>2.5V</td><td>2.5V</td><td>≈0V</td><td class="hl">1</td></tr></table><div class="box box-warn"><b>关键规则</b>：显性(0)覆盖隐性(1)。多个节点同时发时，发0的"赢"，发1的检测到冲突后闭嘴。这就是CAN仲裁机制。</div></div>
+<div class="cd"><h2>📦 一帧CAN数据长什么样</h2><div class="frame"><div style="flex:0 0 40px;background:#7b2ff7"><span class="fname">SOF</span><span class="fsize">1b</span></div><div style="flex:0 0 80px;background:#5b1fd7"><span class="fname">ID</span><span class="fsize">11/29b</span></div><div style="flex:0 0 35px;background:#00aacc"><span class="fname">RTR</span><span class="fsize">1b</span></div><div style="flex:0 0 50px;background:#007799"><span class="fname">DLC</span><span class="fsize">4b</span></div><div style="flex:1;background:linear-gradient(90deg,#ff6b6b,#ff8844)"><span class="fname" style="font-size:1.1em">DATA</span><span class="fsize">0~8 字节</span></div><div style="flex:0 0 55px;background:#ffb74d;color:#333"><span class="fname">CRC</span><span class="fsize">15b</span></div><div style="flex:0 0 40px;background:#66bb6a"><span class="fname">ACK</span><span class="fsize">2b</span></div><div style="flex:0 0 40px;background:#666"><span class="fname">EOF</span><span class="fsize">7b</span></div></div><div class="box box-tip">对仪表工程师来说，最重要的是<b style="color:#ff6b6b">DATA数据场</b>：8字节=64个bit，每个bit或每组bit代表一个信号。</div><h3>CAN 2.0 vs CAN FD</h3><table class="tb"><tr><th>特性</th><th>CAN 2.0</th><th>CAN FD</th></tr><tr><td>最大数据</td><td class="hl">8字节</td><td class="hl">64字节</td></tr><tr><td>最大波特率</td><td>1 Mbps</td><td>数据段≤8 Mbps</td></tr><tr><td>CRC</td><td>15位</td><td>17/21位</td></tr></table><p style="font-size:.82em;color:#777">目前商用车仪表主要用CAN 2.0，后续逐步迁移CAN FD。</p></div>
+<div class="cd"><h2>📡 实车报文长什么样</h2><p>用CANoe/PCAN抓到的数据：</p><table class="tb"><tr><th>属性</th><th>含义</th><th>示例</th></tr><tr><td>周期</td><td>发送间隔</td><td>每200ms一帧</td></tr><tr><td>ID</td><td>报文标识</td><td>0x1A3</td></tr><tr><td>DLC</td><td>数据长度</td><td>8</td></tr><tr><td>Data</td><td>8字节原始数据</td><td class="hl">00 C0 80 00 00 58 14 00</td></tr></table><div class="box box-warn">拿到 <code>00 C0 80 00 00 58 14 00</code> 怎么解读出车速、转速？→ 下一章教你。</div></div>
+</div>
+<div class="ch" id="c4">
+<div class="cd"><h2>🗺️ Motorola编码：64个bit怎么编号</h2><p>CAN数据场8字节×8位=64bit，Motorola编码的编号规则：</p><table class="tb"><tr><th></th><th>Bit7</th><th>Bit6</th><th>Bit5</th><th>Bit4</th><th>Bit3</th><th>Bit2</th><th>Bit1</th><th>Bit0</th></tr><tr><td><b>Byte0</b></td><td>7</td><td>6</td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td><td>0</td></tr><tr><td><b>Byte1</b></td><td>15</td><td>14</td><td>13</td><td>12</td><td>11</td><td>10</td><td>9</td><td>8</td></tr><tr><td><b>Byte2</b></td><td>23</td><td>22</td><td>21</td><td>20</td><td>19</td><td>18</td><td>17</td><td>16</td></tr><tr><td><b>Byte3</b></td><td>31</td><td>30</td><td>29</td><td>28</td><td>27</td><td>26</td><td>25</td><td>24</td></tr><tr><td><b>Byte4</b></td><td>39</td><td>38</td><td>37</td><td>36</td><td>35</td><td>34</td><td>33</td><td>32</td></tr><tr><td><b>Byte5</b></td><td>47</td><td>46</td><td>45</td><td>44</td><td>43</td><td>42</td><td>41</td><td>40</td></tr><tr><td><b>Byte6</b></td><td>55</td><td>54</td><td>53</td><td>52</td><td>51</td><td>50</td><td>49</td><td>48</td></tr><tr><td><b>Byte7</b></td><td>63</td><td>62</td><td>61</td><td>60</td><td>59</td><td>58</td><td>57</td><td>56</td></tr></table><div class="box box-info"><b>口诀</b>：每个字节内，Bit7是最高位(MSB)在左边，Bit0是最低位(LSB)在右边。字节从Byte0到Byte7从上到下排。</div></div>
+<div class="cd"><h2>🔍 报文解读演示器（重点！点一点就懂了）</h2><p style="color:#777;font-size:.82em;margin-bottom:8px">下面模拟一帧真实报文。点击每个字节可以展开看二进制，点击"开始解读"会逐步演示计算过程：</p><div class="msg-decoder"><p style="font-size:.82em;color:#888;margin-bottom:8px">报文数据（模拟 VCU 发送的报文，ID=0x100）：</p><div class="msg-bytes" id="msgBytes"><div class="msg-byte" onclick="toggleByte(0)"><div class="hex-val">00</div><div class="byte-lbl">Byte0</div></div><div class="msg-byte" onclick="toggleByte(1)"><div class="hex-val">80</div><div class="byte-lbl">Byte1</div></div><div class="msg-byte" onclick="toggleByte(2)"><div class="hex-val">00</div><div class="byte-lbl">Byte2</div></div><div class="msg-byte" onclick="toggleByte(3)"><div class="hex-val">29</div><div class="byte-lbl">Byte3</div></div><div class="msg-byte" onclick="toggleByte(4)"><div class="hex-val">00</div><div class="byte-lbl">Byte4</div></div><div class="msg-byte" onclick="toggleByte(5)"><div class="hex-val">00</div><div class="byte-lbl">Byte5</div></div><div class="msg-byte" onclick="toggleByte(6)"><div class="hex-val">00</div><div class="byte-lbl">Byte6</div></div><div class="msg-byte" onclick="toggleByte(7)"><div class="hex-val">00</div><div class="byte-lbl">Byte7</div></div></div><div class="bin-expand" id="binExpand"></div><div style="margin-top:10px;padding:10px;background:#0f0f28;border-radius:8px;font-size:.82em"><b style="color:#c9a0ff">信号定义（来自显示需求表）：</b><br><span style="color:#ff6b6b">■</span> 发动机转速：起始位24，长度12bit，因子0.25，偏移0，单位rpm<br><span style="color:#00d2ff">■</span> 车速信号：起始位40，长度11bit，因子0.05625，偏移0，单位km/h</div><div style="text-align:center;margin-top:12px"><button class="btn btn-p" onclick="startDecode()">▶ 开始逐步解读</button> <button class="btn" onclick="resetDecode()">重置</button></div><div class="calc-steps" id="calcSteps"><div class="calc-step"><div class="sn">1</div><div class="sc">确定信号所在的字节范围</div></div><div class="calc-step"><div class="sn">2</div><div class="sc">将相关字节展开为二进制</div></div><div class="calc-step"><div class="sn">3</div><div class="sc">按起始位和长度截取信号位</div></div><div class="calc-step"><div class="sn">4</div><div class="sc">二进制转十进制（得到原始值Raw Value）</div></div><div class="calc-step"><div class="sn">5</div><div class="sc">代入公式：物理值 = 原始值 × 因子 + 偏移</div></div></div></div></div>
+<div class="cd"><h2>🧮 信号不跨字节（简单情况）</h2><p>如果信号完全在一个字节内，解读更简单：</p><div class="fm" style="text-align:left;font-size:.85em">例：Byte1 = <span class="b">0x80</span>，其中Bit7~Bit4定义了一个4位信号<br><span class="b">0x80</span> = <span class="o">1000</span> <span style="color:#555">0000</span><br>Bit7~4 = <span class="o">1000</span> = 十进制 <span class="b">8</span><br>因子=0.5，偏移=0<br>物理值 = 8 × 0.5 + 0 = <span class="r">4.0</span></div></div>
+<div class="cd"><h2>🔀 信号跨字节（重点难点）</h2><p>上面的演示就是跨字节的情况。发动机转速(12bit)跨越Byte3和Byte4，车速(11bit)跨越Byte5和Byte6。</p><div class="box box-warn"><b>核心技巧</b>：不管信号跨不跨字节，方法都一样：<br>1. 把所有相关字节展开成二进制<br>2. 按位编号找到信号的起始位<br>3. 从起始位开始数出信号长度个bit<br>4. 拼起来转十进制<br>5. 乘以因子加偏移</div></div>
+<div class="cd"><h2>🛠️ 通用报文计算器</h2><p style="color:#777;font-size:.82em;margin-bottom:8px">输入任意报文数据和信号参数，自动计算物理值（每个字节限输入2位十六进制）。位序按 <b style="color:#c9a0ff">Motorola 大端</b> 处理：信号占 起始位 ~ 起始位+长度-1 这一段位，从高端位向低端位依次拼接，MSB 在前。</p><div style="background:#0a0a18;border:1px solid #222;border-radius:8px;padding:14px"><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><input class="inp" id="cb0" placeholder="B0" style="width:60px" maxlength="2" oninput="validateByte(this)"><input class="inp" id="cb1" placeholder="B1" style="width:60px" maxlength="2" oninput="validateByte(this)"><input class="inp" id="cb2" placeholder="B2" style="width:60px" maxlength="2" oninput="validateByte(this)"><input class="inp" id="cb3" placeholder="B3" style="width:60px" maxlength="2" oninput="validateByte(this)"><input class="inp" id="cb4" placeholder="B4" style="width:60px" maxlength="2" oninput="validateByte(this)"><input class="inp" id="cb5" placeholder="B5" style="width:60px" maxlength="2" oninput="validateByte(this)"><input class="inp" id="cb6" placeholder="B6" style="width:60px" maxlength="2" oninput="validateByte(this)"><input class="inp" id="cb7" placeholder="B7" style="width:60px" maxlength="2" oninput="validateByte(this)"></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px"><label style="font-size:.78em;color:#777">起始位</label><input class="inp" id="cSt" placeholder="36" style="width:60px"><label style="font-size:.78em;color:#777">长度</label><input class="inp" id="cLn" placeholder="11" style="width:60px"><label style="font-size:.78em;color:#777">因子</label><input class="inp" id="cFc" placeholder="0.05625" style="width:90px"><label style="font-size:.78em;color:#777">偏移</label><input class="inp" id="cOf" placeholder="0" style="width:60px"></div><button class="btn btn-p" onclick="doCalc()">计算</button><div id="calcOut" style="margin-top:8px;padding:10px;background:#0f0f28;border-radius:6px;font-family:Consolas,monospace;font-size:.85em;min-height:30px;color:#888">填写参数后点计算</div></div></div>
+</div>
+<div class="ch" id="c5">
+<div class="cd"><h2>🔬 为什么要用台架测试</h2><div class="box box-warn"><b>实车没法测的原因：</b><br>1. 各ECU持续发信号，无法单独控制某个信号的状态<br>2. 用CAN盒模拟会和实车信号冲突，仪表显示会闪烁<br>3. 多个报警不会同时出现，无法测优先级</div><div class="box box-tip"><b>台架优势</b>：完全控制输入信号，隔离干扰，系统性验证每个信号响应和优先级。</div></div>
+<div class="cd"><h2>📤 怎么测试仪表外发报文</h2><div class="calc-steps"><div class="calc-step done"><div class="sn">1</div><div class="sc"><b>准备DBC文件</b>：获取仪表外发报文定义（ID、周期、信号列表）</div></div><div class="calc-step done"><div class="sn">2</div><div class="sc"><b>连接CAN工具</b>：CANoe/PCAN连接仪表CAN线，配置波特率(通常500kbps)</div></div><div class="calc-step done"><div class="sn">3</div><div class="sc"><b>抓取报文</b>：过滤出仪表外发ID，观察周期和数据</div></div><div class="calc-step done"><div class="sn">4</div><div class="sc"><b>改变输入条件</b>：如系/解安全带，观察外发信号位变化</div></div><div class="calc-step done"><div class="sn">5</div><div class="sc"><b>解读数据</b>：按编码格式将字节转为物理值，与预期对比</div></div><div class="calc-step done"><div class="sn">6</div><div class="sc"><b>记录报告</b>：每个信号在不同状态下的报文数据</div></div></div></div>
+<div class="cd"><h2>🖥️ 模拟CANoe抓包界面</h2><p style="color:#777;font-size:.82em;margin-bottom:8px">下面模拟CANoe的报文列表界面。点击"开始抓包"会模拟接收报文，点击任意一行可以解读数据：</p><div class="canoe-sim"><div class="canoe-toolbar"><div class="indicator off" id="canLed"></div><span style="font-size:.78em;color:#888" id="canStatus">未连接</span><button class="btn btn-sm btn-p" id="canBtn" onclick="toggleCan()">开始抓包</button><button class="btn btn-sm" onclick="clearCan()">清空</button><span style="flex:1"></span><label style="font-size:.72em;color:#666">过滤ID:</label><input class="inp" id="canFilter" placeholder="如 100" style="width:60px;font-size:.75em"></div><div class="canoe-msg-list" id="canList"><div style="padding:20px;text-align:center;color:#444;font-size:.82em">点击"开始抓包"模拟接收报文</div></div></div><div id="canDecode" style="margin-top:10px;display:none"></div></div>
+<div class="cd"><h2>📋 测试验收要点</h2><table class="tb"><tr><th>测试项</th><th>怎么测</th><th>合格标准</th></tr><tr><td>报文周期</td><td>测量连续帧时间间隔</td><td>与需求表一致(±10%)</td></tr><tr><td>DLC</td><td>检查数据长度</td><td>与DBC定义一致</td></tr><tr><td>信号有效性</td><td>改变输入，观察信号变化</td><td>物理值与输入一致</td></tr><tr><td>默认值</td><td>上电初始状态</td><td>与需求表一致</td></tr><tr><td>超时处理</td><td>断开信号源</td><td>按超时策略处理</td></tr><tr><td>优先级</td><td>同时触发多个报警</td><td>按优先级表显示</td></tr></table></div>
+</div>
+<div class="ch" id="c6">
+<div class="cd"><h2>🧠 综合练习</h2><div class="score"><span>答对: <span class="s" id="q2c">0</span>/<span id="q2t">0</span></span><span id="q2p" style="color:#777">0%</span><button class="btn btn-sm" onclick="resetQ2()">重置</button></div><div id="q2Area"></div></div>
+<div class="cd"><h2>📝 报文解读实战</h2><p style="color:#777;font-size:.82em;margin-bottom:8px">给你一帧报文，算出信号物理值：</p><div style="background:#0a0a18;border:1px solid #222;border-radius:8px;padding:14px"><p style="font-size:.88em;margin-bottom:6px"><b>题目1</b>：报文 <code>00 80 00 29 00 00 00 00</code></p><p style="font-size:.82em;color:#888;margin-bottom:8px">发动机转速：起始位24，长度12bit，因子0.25，偏移0</p><div style="display:flex;gap:8px;align-items:center"><label style="font-size:.82em;color:#888">你的答案(rpm)：</label><input class="inp" id="ans1" placeholder="?" style="width:100px"><button class="btn btn-p btn-sm" onclick="chkAns1()">验证</button></div><div id="ans1R" style="margin-top:6px;font-size:.82em;min-height:18px"></div><hr style="border:none;border-top:1px solid #222;margin:14px 0"><p style="font-size:.88em;margin-bottom:6px"><b>题目2</b>：报文 <code>00 00 00 00 00 58 14 00</code></p><p style="font-size:.82em;color:#888;margin-bottom:8px">车速信号：起始位40，长度11bit，因子0.05625，偏移0（Motorola 大端，MSB 在前）</p><div style="display:flex;gap:8px;align-items:center"><label style="font-size:.82em;color:#888">你的答案(km/h)：</label><input class="inp" id="ans2" placeholder="?" style="width:100px"><button class="btn btn-p btn-sm" onclick="chkAns2()">验证</button></div><div id="ans2R" style="margin-top:6px;font-size:.82em;min-height:18px"></div></div></div>
+<div class="cd"><h2>🏁 培训小结</h2><div class="box box-info"><b>新人必须掌握的5件事：</b><br>1. 二进制/十六进制互转（4位一组）<br>2. CAN帧结构（重点在DATA数据场）<br>3. Motorola 大端编码的位序规则（MSB 在前）<br>4. 从报文字节中提取信号并计算物理值<br>5. 用CAN工具测试外发报文的方法</div></div>
+</div>
+
+<footer class="bl-foot">
+  <a href="index.html">首页</a><a href="archives.html">日志</a><a href="about.html">关于我</a><a href="https://github.com/cocojea" target="_blank" rel="noopener noreferrer">GitHub</a><br>
+  © 2026 <b>cocojee</b> · cocojee blog
+</footer>
+
+<script>
+document.querySelectorAll('#nav button').forEach(b=>{b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.ch').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.c).classList.add('on')}});
+function cv(f){const o=document.getElementById('cvOut');let d;try{if(f==='d'){const v=document.getElementById('dI').value.trim();if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('d');return}d=parseInt(v,10);if(isNaN(d)||d<0)throw new Error('请输入非负整数')}else if(f==='b'){const v=document.getElementById('bI').value.trim().replace(/\s/g,'');if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('b');return}if(!/^[01]+$/.test(v))throw new Error('只能包含0和1');d=parseInt(v,2)}else{const v=document.getElementById('hI').value.trim().replace(/^0x/i,'');if(!v){o.innerHTML='输入任意数值，三种进制实时同步';cI('h');return}if(!/^[0-9a-fA-F]+$/.test(v))throw new Error('无效字符');d=parseInt(v,16)}const b=d.toString(2),h=d.toString(16).toUpperCase();if(f!=='d')document.getElementById('dI').value=d;if(f!=='b')document.getElementById('bI').value=b;if(f!=='h')document.getElementById('hI').value=h;const bg=b.replace(/\B(?=(\d{4})+(?!\d))/g,' ');let s=`DEC: <span class="b">${d}</span> | BIN: <span class="b">${b}</span> (${bg}) | HEX: <span class="b">0x${h}</span> | 位宽: <span class="b">${b.length}bit</span>`;if(b.length>4){const p=b.padStart(Math.ceil(b.length/4)*4,'0');const gs=p.match(/.{4}/g);const hs=gs.map(g=>parseInt(g,2).toString(16).toUpperCase());s+=`<br>4位分组: <span style="color:#c9a0ff">${gs.join(' ')}</span> → <span class="b">${hs.join('')}</span>`}o.innerHTML=s}catch(e){o.innerHTML=`<span style="color:#ff6b6b">❌ ${e.message}</span>`}}
+function cI(k){if(k!=='d')document.getElementById('dI').value='';if(k!=='b')document.getElementById('bI').value='';if(k!=='h')document.getElementById('hI').value=''}
+let B=[0,0,0,0,0,0,0,0];const W=[128,64,32,16,8,4,2,1];
+function rB2(){const v=document.getElementById('bV');v.innerHTML='';B.forEach((b,i)=>{const c=document.createElement('div');c.className='bc'+(b?' on':'');c.innerHTML=`<div class="v">${b}</div><div class="w">${W[i]}</div>`;c.onclick=()=>{B[i]=B[i]?0:1;c.classList.add('pop');setTimeout(()=>c.classList.remove('pop'),300);rB2()};v.appendChild(c)});const d=B.reduce((s,b,i)=>s+b*W[i],0);document.getElementById('vB').textContent=B.join('');document.getElementById('vD').textContent=d;document.getElementById('vH').textContent='0x'+d.toString(16).toUpperCase().padStart(2,'0')}
+function aB(v){B.fill(v);rB2()}function rB(){B=B.map(()=>Math.round(Math.random()));rB2()}function sB(v){for(let i=0;i<8;i++)B[i]=(v>>(7-i))&1;rB2()}rB2();
+let q1={c:0,t:0};function genQ1(){const ts=[()=>{const d=Math.floor(Math.random()*256);const a=d.toString(2).padStart(8,'0');const w=[((d+1)&255).toString(2).padStart(8,'0'),((d+3)&255).toString(2).padStart(8,'0'),((d^0x55)&255).toString(2).padStart(8,'0')].filter(x=>x!==a);return{q:`十进制 <code>${d}</code> → 二进制？`,a,o:sh([a,...w.slice(0,3)])}},()=>{const d=Math.floor(Math.random()*256);const h=d.toString(16).toUpperCase().padStart(2,'0');const w=[((d+1)&255).toString(16).toUpperCase().padStart(2,'0'),((d+16)&255).toString(16).toUpperCase().padStart(2,'0'),((d^0xFF)&255).toString(16).toUpperCase().padStart(2,'0')].filter(x=>x!==h);return{q:`十进制 <code>${d}</code> → 十六进制？`,a:h,o:sh([h,...w.slice(0,3)])}},()=>{const d=Math.floor(Math.random()*16);const b4=d.toString(2).padStart(4,'0');const h=d.toString(16).toUpperCase();const w=[(d+1)%16,(d+7)%16,(d+13)%16].map(x=>x.toString(16).toUpperCase()).filter(x=>x!==h);return{q:`4位二进制 <code>${b4}</code> → 十六进制？`,a:h,o:sh([h,...w])}}];return ts[Math.floor(Math.random()*ts.length)]()}
+let curQ1=null;function sh(a){return a.sort(()=>Math.random()-.5)}
+function rQ1(){curQ1=genQ1();const a=document.getElementById('q1Area');let h=`<div class="qz-q">${curQ1.q}</div><div class="qz-opts">`;curQ1.o.forEach(o=>{h+=`<button class="qz-opt" onclick="cQ1(this,'${o}')">${o}</button>`});h+=`</div><div class="qz-fb" id="q1f"></div>`;a.innerHTML=h}
+function cQ1(btn,sel){if(btn.parentElement.querySelector('.ok,.no'))return;q1.t++;btn.parentElement.querySelectorAll('.qz-opt').forEach(o=>{if(o.textContent===curQ1.a)o.classList.add('ok');else if(o===btn&&sel!==curQ1.a)o.classList.add('no')});const f=document.getElementById('q1f');if(sel===curQ1.a){q1.c++;f.innerHTML='<span style="color:#00c853">✅ 正确！</span>';setTimeout(rQ1,1200)}else f.innerHTML=`<span style="color:#ff5252">❌ 正确答案: ${curQ1.a}</span>`;document.getElementById('q1c').textContent=q1.c;document.getElementById('q1t').textContent=q1.t}
+function resetQ1(){q1={c:0,t:0};document.getElementById('q1c').textContent='0';document.getElementById('q1t').textContent='0';rQ1()}rQ1();
+const demoBytes=[0x00,0x80,0x00,0x29,0x00,0x00,0x00,0x00];let expandedBytes=new Set();
+function toggleByte(i){const el=document.querySelectorAll('.msg-byte')[i];el.classList.remove('clicked');void el.offsetWidth;el.classList.add('clicked');setTimeout(()=>el.classList.remove('clicked'),400);if(expandedBytes.has(i))expandedBytes.delete(i);else expandedBytes.add(i);renderBinExpand();document.querySelectorAll('.msg-byte').forEach((el,idx)=>{el.classList.toggle('active',expandedBytes.has(idx))})}
+function renderBinExpand(){const el=document.getElementById('binExpand');if(expandedBytes.size===0){el.classList.remove('show');return}el.classList.add('show');let html='';const sorted=[...expandedBytes].sort();sorted.forEach(i=>{const v=demoBytes[i];html+=`<div style="display:flex;align-items:center;gap:4px;margin:3px 0"><div class="bin-byte-label">Byte${i} = 0x${v.toString(16).toUpperCase().padStart(2,'0')}</div><div class="bin-row">`;for(let j=7;j>=0;j--){const bit=(v>>j)&1;const motorolaBitNum=i*8+j;html+=`<div class="bin-bit ${bit?'b1':'b0'}" title="Bit${motorolaBitNum}">${bit}<span style="font-size:.45em;display:block;color:#555">${motorolaBitNum}</span></div>`}html+=`</div></div>`});el.innerHTML=html}
+function startDecode(){expandedBytes.clear();expandedBytes.add(3);expandedBytes.add(4);document.querySelectorAll('.msg-byte').forEach((el,i)=>{el.classList.remove('active','in-signal');if(i===3||i===4)el.classList.add('in-signal')});renderBinExpand();const steps=document.querySelectorAll('#calcSteps .calc-step');steps.forEach(s=>{s.classList.remove('done','current')});const stepData=[{text:'<b>发动机转速信号</b>：起始位24，长度12bit<br>涉及 <span class="r">Byte3</span> 和 <span class="r">Byte4</span>（已用红色高亮）'},{text:'Byte3 = 0x29 = <span class="o">0010 1001</span><br>Byte4 = 0x00 = <span class="o">0000 0000</span>'},{text:'从Bit35到Bit24依次截取（Motorola高位在前）：<br><span class="r">0000</span> + <span class="r">00101001</span> = <span class="b">0000 0010 1001</span>'},{text:'<span class="b">000000101001</span> = <span class="o">41</span> (32+8+1)'},{text:'物理值 = 41 × 0.25 + 0 = <span class="r" style="font-size:1.2em">10.25 rpm</span>'}];let si=0;function nextStep(){if(si>=stepData.length)return;steps.forEach((s,i)=>{s.classList.remove('current','done');if(i<si)s.classList.add('done');else if(i===si)s.classList.add('current')});steps[si].querySelector('.sc').innerHTML=stepData[si].text;si++;if(si<stepData.length)setTimeout(nextStep,1500);else steps.forEach(s=>{s.classList.remove('current');s.classList.add('done')})}nextStep()}
+function resetDecode(){expandedBytes.clear();document.querySelectorAll('.msg-byte').forEach(el=>{el.classList.remove('active','in-signal')});document.getElementById('binExpand').classList.remove('show');document.getElementById('binExpand').innerHTML='';document.querySelectorAll('#calcSteps .calc-step').forEach(s=>{s.classList.remove('done','current')});const defaults=['确定信号所在的字节范围','将相关字节展开为二进制','按起始位和长度截取信号位','二进制转十进制（得到原始值Raw Value）','代入公式：物理值 = 原始值 × 因子 + 偏移'];document.querySelectorAll('#calcSteps .calc-step .sc').forEach((s,i)=>{s.innerHTML=defaults[i]})}
+function validateByte(inp){let v=inp.value.toUpperCase().replace(/[^0-9A-F]/g,'');if(v.length>2)v=v.substring(0,2);inp.value=v}
+function doCalc(){const o=document.getElementById('calcOut');try{const bytes=[];for(let i=0;i<8;i++){const v=document.getElementById('cb'+i).value.trim().replace(/^0x/i,'');if(!v)throw new Error(`Byte${i}未填`);if(!/^[0-9a-fA-F]{1,2}$/.test(v))throw new Error(`Byte${i}格式错误`);bytes.push(parseInt(v,16))}const st=parseInt(document.getElementById('cSt').value);const ln=parseInt(document.getElementById('cLn').value);const fc=parseFloat(document.getElementById('cFc').value);const of2=parseFloat(document.getElementById('cOf').value);if(isNaN(st)||isNaN(ln)||isNaN(fc))throw new Error('参数不完整');let rawBin='';for(let b=st+ln-1;b>=st;b--){const byteIdx=Math.floor(b/8);const bitInByte=b%8;rawBin+=((bytes[byteIdx]>>bitInByte)&1)}const raw=parseInt(rawBin,2);const phys=raw*fc+of2;o.innerHTML=`提取: <span class="r">${rawBin}</span> (${rawBin.length}bit)<br>原始值: <span class="o">${raw}</span> (0x${raw.toString(16).toUpperCase()})<br>物理值: <span class="b" style="font-size:1.1em">${raw} × ${fc} + ${of2} = ${phys.toFixed(3)}</span>`}catch(e){o.innerHTML=`<span style="color:#ff6b6b">❌ ${e.message}</span>`}}
+let canRunning=false,canTimer=null,canMsgs=[];const canMsgDefs=[{id:'100',name:'VCU_01',data:()=>randData(),decode:'转速/车速'},{id:'1A3',name:'BCM_02',data:()=>randData(),decode:'灯光/车门'},{id:'2B5',name:'BMS_01',data:()=>randData(),decode:'SOC/电压'},{id:'301',name:'ICM_TX',data:()=>randData(),decode:'安全带/手刹',dir:'TX'},{id:'0C0',name:'EPS_01',data:()=>randData(),decode:'转向角'},{id:'150',name:'ESC_01',data:()=>randData(),decode:'轮速'}];
+function randData(){return Array.from({length:8},()=>Math.floor(Math.random()*256).toString(16).toUpperCase().padStart(2,'0')).join(' ')}
+function toggleCan(){canRunning=!canRunning;const btn=document.getElementById('canBtn');const led=document.getElementById('canLed');const st=document.getElementById('canStatus');if(canRunning){btn.textContent='停止';led.className='indicator on';st.textContent='已连接 500kbps';canTimer=setInterval(addCanMsg,400+Math.random()*300)}else{btn.textContent='开始抓包';led.className='indicator off';st.textContent='已暂停';clearInterval(canTimer)}}
+function addCanMsg(){const def=canMsgDefs[Math.floor(Math.random()*canMsgDefs.length)];const now=new Date();const ts=now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0')+'.'+Math.floor(now.getMilliseconds()/10).toString().padStart(2,'0');const data=def.data();canMsgs.unshift({ts,id:def.id,name:def.name,data,dlc:8,dir:def.dir||'RX',decode:def.decode});if(canMsgs.length>50)canMsgs.pop();renderCan()}
+function renderCan(){const el=document.getElementById('canList');const filter=document.getElementById('canFilter').value.trim().toUpperCase();const filtered=filter?canMsgs.filter(m=>m.id.includes(filter)):canMsgs;if(filtered.length===0){el.innerHTML='<div style="padding:20px;text-align:center;color:#444;font-size:.82em">'+(canMsgs.length?'无匹配报文':'等待报文...')+'</div>';return}el.innerHTML=filtered.slice(0,30).map((m,i)=>`<div class="canoe-row" onclick="decodeCanMsg(${i})"><span class="time">${m.ts}</span><span class="dir" style="color:${m.dir==='TX'?'#ffb74d':'#555'}">${m.dir==='TX'?'↑':'↓'}</span><span class="mid">0x${m.id}</span><span class="dlc">[${m.dlc}]</span><span class="data">${m.data}</span><span class="decoded">${m.decode}</span></div>`).join('')}
+function decodeCanMsg(i){const filter=document.getElementById('canFilter').value.trim().toUpperCase();const filtered=filter?canMsgs.filter(m=>m.id.includes(filter)):canMsgs;const m=filtered[i];if(!m)return;const el=document.getElementById('canDecode');el.style.display='block';const bytes=m.data.split(' ');el.innerHTML=`<div style="background:#0a0a18;border:1px solid #222;border-radius:8px;padding:14px"><p style="font-size:.88em;margin-bottom:8px"><b>解读报文 0x${m.id} (${m.name})</b></p><p style="font-size:.82em;color:#888;margin-bottom:6px">原始数据: <code>${m.data}</code></p><div style="font-family:Consolas,monospace;font-size:.8em;line-height:1.8">${bytes.map((b,j)=>{const v=parseInt(b,16);return`Byte${j}: <span style="color:#00d2ff">0x${b}</span> = <span style="color:#c9a0ff">${v.toString(2).padStart(8,'0')}</span> = <span style="color:#ffb74d">${v}</span>`}).join('<br>')}</div><p style="font-size:.82em;color:#888;margin-top:8px">💡 查DBC/显示需求表中的信号定义（起始位、长度、因子、偏移），用计算器计算。</p></div>`}
+function clearCan(){canMsgs=[];document.getElementById('canList').innerHTML='<div style="padding:20px;text-align:center;color:#444;font-size:.82em">已清空</div>';document.getElementById('canDecode').style.display='none'}
+document.getElementById('canFilter').addEventListener('input',renderCan);
+let q2={c:0,t:0},curQ2=null;function genQ2(){const ts=[()=>{const d=Math.floor(Math.random()*256);const a=d.toString(2).padStart(8,'0');const w=[((d+1)&255).toString(2).padStart(8,'0'),((d^0x55)&255).toString(2).padStart(8,'0'),((d+3)&255).toString(2).padStart(8,'0')].filter(x=>x!==a);return{q:`十进制 <code>${d}</code> → 二进制？`,a,o:sh([a,...w.slice(0,3)])}},()=>{const d=Math.floor(Math.random()*256);const h=d.toString(16).toUpperCase().padStart(2,'0');const w=[((d+1)&255).toString(16).toUpperCase().padStart(2,'0'),((d^0xFF)&255).toString(16).toUpperCase().padStart(2,'0'),((d+16)&255).toString(16).toUpperCase().padStart(2,'0')].filter(x=>x!==h);return{q:`十进制 <code>${d}</code> → 十六进制？`,a:h,o:sh([h,...w.slice(0,3)])}},()=>{const raw=Math.floor(Math.random()*2000);const f=[0.05625,0.25,0.5,1,2][Math.floor(Math.random()*5)];const o2=[0,-40][Math.floor(Math.random()*2)];const p=(raw*f+o2).toFixed(2);const w=[(raw*f+o2+1).toFixed(2),(raw*f+o2-f).toFixed(2),(raw*f+o2+f*3).toFixed(2)].filter(x=>x!==p);return{q:`Raw=<code>${raw}</code>, Factor=<code>${f}</code>, Offset=<code>${o2}</code>, 物理值=?`,a:p,o:sh([p,...w.slice(0,3)])}},()=>{return{q:'CAN 2.0单帧最大数据长度？',a:'8字节',o:sh(['8字节','16字节','4字节','64字节'])}},()=>{return{q:'1位十六进制对应几位二进制？',a:'4位',o:sh(['4位','2位','3位','8位'])}},()=>{return{q:'Motorola编码中，Byte1的Bit7编号是？',a:'15',o:sh(['15','8','16','7'])}}];return ts[Math.floor(Math.random()*ts.length)]()}
+function rQ2(){curQ2=genQ2();const a=document.getElementById('q2Area');let h=`<div class="qz-q">${curQ2.q}</div><div class="qz-opts">`;curQ2.o.forEach(o=>{h+=`<button class="qz-opt" onclick="cQ2(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`});h+=`</div><div class="qz-fb" id="q2f"></div><button class="btn btn-sm" id="q2n" onclick="rQ2()" style="display:none;margin-top:6px">下一题 →</button>`;a.innerHTML=h}
+function cQ2(btn,sel){if(btn.parentElement.querySelector('.ok,.no'))return;q2.t++;btn.parentElement.querySelectorAll('.qz-opt').forEach(o=>{if(o.textContent===curQ2.a)o.classList.add('ok');else if(o===btn&&sel!==curQ2.a)o.classList.add('no')});const f=document.getElementById('q2f');if(sel===curQ2.a){q2.c++;f.innerHTML='<span style="color:#00c853">✅ 正确！</span>'}else f.innerHTML=`<span style="color:#ff5252">❌ 正确答案: <b>${curQ2.a}</b></span>`;document.getElementById('q2c').textContent=q2.c;document.getElementById('q2t').textContent=q2.t;document.getElementById('q2p').textContent=q2.t?Math.round(q2.c/q2.t*100)+'%':'0%';document.getElementById('q2n').style.display='inline-block'}
+function resetQ2(){q2={c:0,t:0};document.getElementById('q2c').textContent='0';document.getElementById('q2t').textContent='0';document.getElementById('q2p').textContent='0%';rQ2()}rQ2();
+function chkAns1(){const v=parseFloat(document.getElementById('ans1').value);const r=document.getElementById('ans1R');if(isNaN(v)){r.innerHTML='<span style="color:#ff6b6b">请输入数字</span>';return}if(Math.abs(v-10.25)<0.1){r.innerHTML=`<span style="color:#00c853;font-weight:700">✅ 正确！</span><br>41 × 0.25 = <b>10.25 rpm</b>`}else{r.innerHTML=`<span style="color:#ff5252">❌ 再算算</span> <button class="btn btn-sm" onclick="document.getElementById('ans1R').innerHTML='<span style=\\'color:#ffb74d\\'>Byte3=0x29, Byte4=0x00 → 拼接=000000101001=41<br>41 × 0.25 = 10.25 rpm</span>'">看答案</button>`}}
+function chkAns2(){const v=parseFloat(document.getElementById('ans2').value);const r=document.getElementById('ans2R');if(isNaN(v)){r.innerHTML='<span style="color:#ff6b6b">请输入数字</span>';return}if(Math.abs(v-62.55)<0.5){r.innerHTML=`<span style="color:#00c853;font-weight:700">✅ 正确！</span><br>1112 × 0.05625 = <b>62.55 km/h</b>`}else{r.innerHTML=`<span style="color:#ff5252">❌ 再算算</span> <button class="btn btn-sm" onclick="document.getElementById('ans2R').innerHTML='<span style=\\'color:#ffb74d\\'>Byte5=0x58, Byte6=0x14 → 提取11bit=1112<br>1112 × 0.05625 = 62.55 km/h</span>'">看答案</button>`}}
+</script>
+</body>
+</html>
